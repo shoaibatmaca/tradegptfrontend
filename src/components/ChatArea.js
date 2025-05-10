@@ -340,7 +340,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const messagesEndRef = useRef(null);
 
   const OPENROUTER_API_KEY =
-    "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";
+    "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";
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
   const token = new URLSearchParams(window.location.search).get("token");
@@ -462,7 +462,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
+            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
             "X-Title": "Stock Analysis Chat",
           },
         }
