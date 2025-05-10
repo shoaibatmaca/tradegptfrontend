@@ -340,7 +340,8 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const messagesEndRef = useRef(null);
 
   const OPENROUTER_API_KEY =
-    "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";
+    // "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";
+    "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";
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
   const token = new URLSearchParams(window.location.search).get("token");
