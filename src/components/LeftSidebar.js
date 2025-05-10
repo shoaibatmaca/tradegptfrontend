@@ -1,16 +1,34 @@
 // src/components/LeftSidebar.js
 
-import React, { useState } from 'react';
+import { useState } from "react";
+
+import jwt_decode from "jwt-decode";
 
 const LeftSidebar = ({ collapsed, toggleSidebar }) => {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const [activeItem, setActiveItem] = useState("dashboard");
 
   const handleNavItemClick = (item) => {
     setActiveItem(item);
   };
 
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+
+  const handleUserClick = () => {
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      const decoded = jwt_decode(token);
+      setUserInfo(decoded);
+      setShowProfileModal(true);
+    }
+  };
+
   return (
-    <div className={`bg-sidebar-bg text-primary-text h-screen flex flex-col sticky top-0 overflow-y-auto transition-all duration-300 ${collapsed ? 'w-16' : 'w-72'}`}>
+    <div
+      className={`bg-sidebar-bg text-primary-text h-screen flex flex-col sticky top-0 overflow-y-auto transition-all duration-300 ${
+        collapsed ? "w-16" : "w-72"
+      }`}
+    >
       <div className="p-4 border-b border-gray-700 flex items-center justify-between">
         {!collapsed && (
           <div className="flex items-center">
@@ -33,7 +51,11 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
             <span className="p-2 text-secondary-text">
               <i className="bi bi-search"></i>
             </span>
-            <input type="text" className="bg-transparent border-0 text-primary-text p-2 focus:outline-none w-full" placeholder="Search" />
+            <input
+              type="text"
+              className="bg-transparent border-0 text-primary-text p-2 focus:outline-none w-full"
+              placeholder="Search"
+            />
           </div>
         ) : (
           <div className="flex justify-center text-secondary-text">
@@ -44,11 +66,21 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
 
       <div className="flex-1 overflow-y-auto">
         <ul className="p-2 list-item">
-          <li className={`p-2 rounded-md cursor-pointer flex items-center bg-[#2c3e50] h-[52px] hover:bg-hover-bg ${activeItem === 'dashboard' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('dashboard')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center bg-[#2c3e50] h-[52px] hover:bg-hover-bg ${
+              activeItem === "dashboard" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("dashboard")}
+          >
             <i className="bi bi-grid-fill mr-3"></i>
             {!collapsed && <span>Dashboard</span>}
           </li>
-          <li className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'prompts' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('prompts')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "prompts" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("prompts")}
+          >
             <i className="bi bi-lightbulb-fill mr-3"></i>
             {!collapsed && <span>Recommended Prompts</span>}
           </li>
@@ -59,11 +91,21 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
         </div>
 
         <ul className="p-2 list-item">
-          <li className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'today' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('today')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "today" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("today")}
+          >
             <i className="bi bi-calendar-day mr-3"></i>
             {!collapsed && <span>Today</span>}
           </li>
-          <li className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'past' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('past')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "past" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("past")}
+          >
             <i className="bi bi-calendar-range mr-3"></i>
             {!collapsed && <span>Over 30 Days Ago</span>}
           </li>
@@ -74,11 +116,21 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
         </div>
 
         <ul className="p-2 list-item">
-          <li className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'strategies' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('strategies')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "strategies" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("strategies")}
+          >
             <i className="bi bi-graph-up mr-3"></i>
             {!collapsed && <span>Investment Strategies Overview</span>}
           </li>
-          <li className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'insights' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('insights')}>
+          <li
+            className={`p-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "insights" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("insights")}
+          >
             <i className="bi bi-pie-chart-fill mr-3"></i>
             {!collapsed && <span>Investment Insights and Analysis</span>}
           </li>
@@ -86,9 +138,16 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
 
         <div className="p-4 mt-4">
           {!collapsed && (
-            <span className="inline-block bg-primary-accent text-primary-text text-xs px-2 py-1 rounded">GUIDE</span>
+            <span className="inline-block bg-primary-accent text-primary-text text-xs px-2 py-1 rounded">
+              GUIDE
+            </span>
           )}
-          <div className={`p-2 mt-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${activeItem === 'intro' ? 'bg-hover-bg' : ''}`} onClick={() => handleNavItemClick('intro')}>
+          <div
+            className={`p-2 mt-2 rounded-md cursor-pointer flex items-center hover:bg-hover-bg ${
+              activeItem === "intro" ? "bg-hover-bg" : ""
+            }`}
+            onClick={() => handleNavItemClick("intro")}
+          >
             <i className="bi bi-info-circle-fill mr-3"></i>
             {!collapsed && <span>Intro to TradeGPT</span>}
           </div>
@@ -96,17 +155,44 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
       </div>
 
       <div className="p-4 border-t border-gray-700">
+        <div
+          className="flex items-center cursor-pointer"
+          onClick={handleUserClick}
+        >
+          <div className="bg-hover-bg w-9 h-9 rounded-full flex items-center justify-center text-secondary-text">
+            <i className="bi bi-person-circle"></i>
+          </div>
+          {!collapsed && (
+            <div className="ml-2">
+              <div className="text-sm font-medium text-primary-text">
+                {userInfo?.username || "User"}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showProfileModal && (
+        <UserProfileModal
+          userInfo={userInfo}
+          onClose={() => setShowProfileModal(false)}
+        />
+      )}
+
+      {/* <div className="p-4 border-t border-gray-700">
         <div className="flex items-center">
           <div className="bg-hover-bg w-9 h-9 rounded-full flex items-center justify-center text-secondary-text">
             <i className="bi bi-person-circle"></i>
           </div>
           {!collapsed && (
             <div className="ml-2">
-              <div className="text-sm font-medium text-primary-text">Users 5352</div>
+              <div className="text-sm font-medium text-primary-text">
+                Users 5352
+              </div>
             </div>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
