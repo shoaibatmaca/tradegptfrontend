@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { jwtDecode } from "jwt-decode";
+import jwt_decode from "jwt-decode";
 
 const LeftSidebar = ({ collapsed, toggleSidebar }) => {
   const [activeItem, setActiveItem] = useState("dashboard");
@@ -17,7 +17,8 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
   const handleUserClick = () => {
     const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
-      const decoded = jwtDecode(token);
+      const decoded = jwt_decode(token);
+
       setUserInfo(decoded);
       setShowProfileModal(true);
     }
