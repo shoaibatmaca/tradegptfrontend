@@ -111,7 +111,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       return response.data.choices?.[0]?.message?.content || "No response.";
     } catch (error) {
       console.error("OpenRouter error:", error);
-      setApiError("Failed to fetch AI response.");
+      setApiError("Due to high demand our service currently unavailable");
       return "Sorry, something went wrong.";
     }
   };
