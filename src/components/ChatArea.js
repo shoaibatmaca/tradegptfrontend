@@ -325,6 +325,7 @@
 // export default ChatArea;
 
 // ✅ Final Full ChatArea Component with Prompt Cards, Session Storage, OpenRouter AI, and Message Limit
+
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import PromptCard from "./PromptCard";
@@ -377,27 +378,22 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
   const startNewSession = async () => {
     const res = await axios.post(
-      `${BACKEND_URL}/api/chat/start/`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      `${BACKEND_URL}/api/chat/start/?token=${token}`
     );
     setSessionId(res.data.session_id);
   };
 
   const saveMessage = async (role, content) => {
     await axios.post(
-      `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/`,
-      { role, content },
-      { headers: { Authorization: `Bearer ${token}` } }
+      `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
+      { role, content }
     );
   };
 
   const checkMessageLimit = async () => {
-    const res = await axios.get(`${BACKEND_URL}/api/chat/message-limit/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await axios.get(
+      `${BACKEND_URL}/api/chat/message-limit/?token=${token}`
+    );
     return res.data;
   };
 
@@ -466,7 +462,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
+            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
             "X-Title": "Stock Analysis Chat",
           },
         }
