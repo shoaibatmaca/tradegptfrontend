@@ -451,14 +451,19 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setApiError(null);
     try {
       const response = await axios.post(
-        "https://backendoftradegpt-production.up.railway.app/api/proxy/openrouter/",
-        { prompt: messageText }
+        `${BACKEND_URL}/api/proxy/openrouter/`,
+        { prompt: messageText }, // ✅ must be JSON body with `prompt`
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data.choices?.[0]?.message?.content || "No response.";
     } catch (error) {
       console.error("OpenRouter proxy error:", error);
-      setApiError("Failed to fetch AI response.");
-      return "Sorry, something went wrong.";
+      setApiError("Failed to fetch AI response from proxy.");
+      return "Proxy failed.";
     }
   };
 
