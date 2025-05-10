@@ -452,7 +452,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/api/proxy/openrouter/`,
-        { prompt: messageText }, // ✅ must be JSON body with `prompt`
+        { prompt: messageText }, //  must be JSON body with `prompt`
         {
           headers: {
             "Content-Type": "application/json",
