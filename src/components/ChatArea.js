@@ -103,7 +103,8 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
+            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
+            // "HTTP-Referer": window.location.origin,
             "X-Title": "TradeGPT Chat",
           },
         }
@@ -112,7 +113,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     } catch (error) {
       console.error("OpenRouter error:", error);
       setApiError("Due to high demand our service currently unavailable");
-      return "Sorry, something went wrong.";
+      return "Due to high demand our service currently unavailable";
     }
   };
 
@@ -143,7 +144,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
+            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
             "X-Title": "Stock Analysis Chat",
           },
         }
