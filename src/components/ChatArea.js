@@ -373,9 +373,20 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     },
   ];
 
+  // useEffect(() => {
+  //   if (!sessionId && token) startNewSession();
+  // }, [token]);
   useEffect(() => {
-    if (!sessionId && token) startNewSession();
-  }, [token]);
+    if (!sessionId && token) {
+      const initialize = async () => {
+        const res = await axios.get(
+          `${BACKEND_URL}/api/chat/start/?token=${token}`
+        );
+        setSessionId(res.data.session_id);
+      };
+      initialize();
+    }
+  }, [token, sessionId]);
 
   const startNewSession = async () => {
     const res = await axios.post(
@@ -410,27 +421,42 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setInputMessage(e.target.value);
   };
 
+  // const callOpenRouterAPI = async (messageText) => {
+  //   setApiError(null);
+  //   try {
+  //     const response = await axios.post(
+  //       "https://openrouter.ai/api/v1/chat/completions",
+  //       {
+  //         model: "deepseek/deepseek-chat:free",
+  //         messages: [{ role: "user", content: messageText }],
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+  //           "Content-Type": "application/json",
+  //           "HTTP-Referer": window.location.origin,
+  //           "X-Title": "TradeGPT Chat",
+  //         },
+  //       }
+  //     );
+  //     return response.data.choices?.[0]?.message?.content || "No response.";
+  //   } catch (error) {
+  //     console.error("OpenRouter error:", error);
+  //     setApiError("Failed to fetch AI response.");
+  //     return "Sorry, something went wrong.";
+  //   }
+  // };
+
   const callOpenRouterAPI = async (messageText) => {
     setApiError(null);
     try {
       const response = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          model: "deepseek/deepseek-chat:free",
-          messages: [{ role: "user", content: messageText }],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "TradeGPT Chat",
-          },
-        }
+        "https://backendoftradegpt-production.up.railway.app/api/proxy/openrouter/",
+        { prompt: messageText }
       );
       return response.data.choices?.[0]?.message?.content || "No response.";
     } catch (error) {
-      console.error("OpenRouter error:", error);
+      console.error("OpenRouter proxy error:", error);
       setApiError("Failed to fetch AI response.");
       return "Sorry, something went wrong.";
     }
