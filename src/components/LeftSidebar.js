@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserProfileModal from "./UserProfileModal";
 
 // import jwt_decode from "jwt-decode";
@@ -24,6 +24,17 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
       setShowProfileModal(true);
     }
   };
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserInfo(decoded);
+      } catch (error) {
+        console.error("Invalid token:", error);
+      }
+    }
+  }, []);
 
   return (
     <div
@@ -161,13 +172,24 @@ const LeftSidebar = ({ collapsed, toggleSidebar }) => {
           className="flex items-center cursor-pointer"
           onClick={handleUserClick}
         >
-          <div className="bg-hover-bg w-9 h-9 rounded-full flex items-center justify-center text-secondary-text">
-            <i className="bi bi-person-circle"></i>
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-600">
+            {userInfo?.profile_photo ? (
+              <img
+                src={userInfo.profile_photo}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="bg-hover-bg w-full h-full flex items-center justify-center text-secondary-text">
+                <i className="bi bi-person-circle"></i>
+              </div>
+            )}
           </div>
+
           {!collapsed && (
             <div className="ml-2">
               <div className="text-sm font-medium text-primary-text">
-                {userInfo?.username || "User"}
+                {userInfo ? userInfo.username : "Loading..."}
               </div>
             </div>
           )}
