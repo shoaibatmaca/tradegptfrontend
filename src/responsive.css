@@ -1,0 +1,425 @@
+/* 
+  Responsive CSS for TradeGPT Components
+  This CSS works with your existing components without modifying their structure
+*/
+
+/* Base variables */
+:root {
+    --sidebar-width: 272px;
+    --collapsed-sidebar-width: 64px;
+    --watchlist-width: 300px;
+    --sidebar-bg: #161b25;
+    --border-color: #3a3a4c;
+    --transition-speed: 0.3s;
+  }
+  
+  /* Left Sidebar Responsiveness */
+  .left-sidebar, 
+  div[class*="bg-sidebar-bg"] {
+    transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+    position: fixed !important;
+    height: 100vh !important;
+    z-index: 40;
+    left: 0;
+    top: 0;
+  }
+  
+  /* Watchlist Sidebar Responsiveness */
+  .watchlist-sidebar,
+  div[class*="w-[300px]"] {
+    transition: transform var(--transition-speed) ease;
+    position: fixed !important;
+    height: 100vh !important;
+    width: var(--watchlist-width) !important;
+    z-index: 40;
+    right: 0;
+    top: 0;
+  }
+  
+  /* Main content area */
+  .chat-area,
+  div[class*="flex-col h-screen bg-[#161921]"] {
+    margin-left: var(--sidebar-width);
+    margin-right: var(--watchlist-width);
+    transition: margin var(--transition-speed) ease;
+  }
+  
+  /* Toggle buttons */
+  .sidebar-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    color: #a0aec0;
+    border-radius: 50%;
+    padding: 8px;
+    transition: background-color 0.2s;
+  }
+  
+  .sidebar-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Mobile menu overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 35;
+  }
+  
+  /* Mobile header */
+  .mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background-color: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Large screens (Desktop) */
+  @media (min-width: 1025px) {
+    /* Default state - both sidebars visible */
+    .left-sidebar.collapsed,
+    div[class*="bg-sidebar-bg"].collapsed {
+      width: var(--collapsed-sidebar-width) !important;
+    }
+    
+    .left-sidebar:not(.collapsed),
+    div[class*="bg-sidebar-bg"]:not(.collapsed) {
+      width: var(--sidebar-width) !important;
+    }
+    
+    /* Text hiding when sidebar is collapsed */
+    .left-sidebar.collapsed span:not(.icon),
+    div[class*="bg-sidebar-bg"].collapsed span:not(.icon),
+    .left-sidebar.collapsed h3,
+    div[class*="bg-sidebar-bg"].collapsed h3,
+    .left-sidebar.collapsed input,
+    div[class*="bg-sidebar-bg"].collapsed input {
+      display: none;
+    }
+    
+    /* Adjust content margin based on sidebar state */
+    .chat-area.left-collapsed,
+    div[class*="flex-col h-screen bg-[#161921]"].left-collapsed {
+      margin-left: var(--collapsed-sidebar-width);
+    }
+  }
+  
+  /* Medium screens (Tablet) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* Default to collapsed left sidebar */
+    .left-sidebar,
+    div[class*="bg-sidebar-bg"] {
+      width: var(--collapsed-sidebar-width) !important;
+    }
+    
+    .left-sidebar.expanded,
+    div[class*="bg-sidebar-bg"].expanded {
+      width: var(--sidebar-width) !important;
+    }
+    
+    /* Default to hidden watchlist */
+    .watchlist-sidebar,
+    div[class*="w-[300px]"] {
+      transform: translateX(100%);
+    }
+    
+    .watchlist-sidebar.expanded,
+    div[class*="w-[300px]"].expanded {
+      transform: translateX(0);
+    }
+    
+    /* Adjust content area */
+    .chat-area,
+    div[class*="flex-col h-screen bg-[#161921]"] {
+      margin-left: var(--collapsed-sidebar-width);
+      margin-right: 0;
+    }
+    
+    .chat-area.left-expanded,
+    div[class*="flex-col h-screen bg-[#161921]"].left-expanded {
+      margin-left: var(--sidebar-width);
+    }
+    
+    /* Hide text in collapsed sidebar */
+    .left-sidebar:not(.expanded) span:not(.icon),
+    div[class*="bg-sidebar-bg"]:not(.expanded) span:not(.icon),
+    .left-sidebar:not(.expanded) h3,
+    div[class*="bg-sidebar-bg"]:not(.expanded) h3,
+    .left-sidebar:not(.expanded) input,
+    div[class*="bg-sidebar-bg"]:not(.expanded) input {
+      display: none;
+    }
+  }
+  
+  /* Small screens (Mobile) */
+  @media (max-width: 767px) {
+    /* Show mobile header */
+    .mobile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* Sidebars hidden by default */
+    .left-sidebar,
+    div[class*="bg-sidebar-bg"] {
+      transform: translateX(-100%);
+      width: 85% !important;
+      max-width: var(--sidebar-width);
+    }
+    
+    .watchlist-sidebar,
+    div[class*="w-[300px]"] {
+      transform: translateX(100%);
+      width: 85% !important;
+      max-width: var(--watchlist-width);
+    }
+    
+    /* Expanded state */
+    .left-sidebar.expanded,
+    div[class*="bg-sidebar-bg"].expanded {
+      transform: translateX(0);
+    }
+    
+    .watchlist-sidebar.expanded,
+    div[class*="w-[300px]"].expanded {
+      transform: translateX(0);
+    }
+    
+    /* Content area takes full width */
+    .chat-area,
+    div[class*="flex-col h-screen bg-[#161921]"] {
+      margin-left: 0;
+      margin-right: 0;
+      padding-top: 60px; /* Space for mobile header */
+    }
+    
+    /* Show overlay when sidebar is expanded */
+    .sidebar-overlay.active {
+      display: block;
+    }
+    
+    /* Make sure watchlist content is scrollable and doesn't overflow */
+    .watchlist-sidebar .p-4,
+    div[class*="w-[300px]"] .p-4 {
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+  }
+  
+  /* Additions for watchlist items */
+  .ticker-chart svg {
+    width: 100%;
+    max-height: 32px;
+  }
+  
+  .price-box {
+    font-size: 0.875rem;
+  }
+  
+  .watchlist-btns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .watchlist-btns button {
+    white-space: nowrap;
+    font-size: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+  }
+  
+  /* Helper classes for toggling sidebar visibility */
+  .hidden {
+    display: none !important;
+  }
+  
+  /* JavaScript utility classes - to be added/removed by your JS */
+  .expanded {
+    transform: translateX(0) !important;
+  }
+  
+  .collapsed {
+    width: var(--collapsed-sidebar-width) !important;
+  }
+  
+  .left-collapsed {
+    margin-left: var(--collapsed-sidebar-width) !important;
+  }
+  
+  .left-expanded {
+    margin-left: var(--sidebar-width) !important;
+  }
+  
+  .watchlist-collapsed {
+    margin-right: 0 !important;
+  }
+  
+  .watchlist-expanded {
+    margin-right: var(--watchlist-width) !important;
+  }
+  
+  /* Close buttons */
+  .close-sidebar {
+    display: none;
+  }
+  
+  @media (max-width: 767px) {
+    .close-sidebar {
+      display: block;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      cursor: pointer;
+    }
+  }
+
+
+  /* Mobile Sidebars CSS Fix */
+
+/* Add this CSS to make your sidebars accessible on mobile */
+
+/* Mobile Header (to toggle sidebars) */
+.mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #161b25;
+    padding: 10px 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    border-bottom: 1px solid #3a3a4c;
+  }
+  
+  .mobile-header .logo {
+    font-weight: bold;
+    color: white;
+    font-size: 18px;
+  }
+  
+  .mobile-header .toggle-button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  /* Left Sidebar */
+  .left-sidebar, 
+  [class*="bg-sidebar-bg"] {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 272px; /* Full width when expanded */
+    background-color: #161b25;
+    z-index: 60;
+    transform: translateX(-100%); /* Hidden by default on mobile */
+    transition: transform 0.3s ease;
+  }
+  
+  .left-sidebar.visible,
+  [class*="bg-sidebar-bg"].visible {
+    transform: translateX(0); /* Visible when .visible class is added */
+  }
+  
+  /* Watchlist (Right Sidebar) */
+  .watchlist-sidebar,
+  [class*="w-[300px]"] {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 300px;
+    background-color: #161b25;
+    z-index: 60;
+    transform: translateX(100%); /* Hidden by default on mobile */
+    transition: transform 0.3s ease;
+  }
+  
+  .watchlist-sidebar.visible,
+  [class*="w-[300px]"].visible {
+    transform: translateX(0); /* Visible when .visible class is added */
+  }
+  
+  /* Overlay (backdrop when sidebars are open) */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 55;
+    display: none;
+  }
+  
+  .sidebar-overlay.visible {
+    display: block;
+  }
+  
+  /* Main content - add padding for the mobile header */
+  .chat-area,
+  [class*="flex-col h-screen bg-[#161921]"] {
+    padding-top: 0px !important; 
+  }
+  
+  /* Media queries */
+  @media (max-width: 768px) {
+    /* Ensure mobile header is visible */
+    .mobile-header {
+      display: flex;
+    }
+    
+    /* Adjust content padding for mobile header */
+    .chat-area,
+    [class*="flex-col h-screen bg-[#161921]"] {
+      padding-top: 60px  !important;
+    }
+    .h-screen {
+        height: auto !important;
+      }
+  }
+  
+  @media (min-width: 769px) {
+    /* Hide mobile header on larger screens */
+    .mobile-header {
+      display: none;
+    }
+    
+    /* Reset sidebar transforms for desktop */
+    .left-sidebar, 
+    [class*="bg-sidebar-bg"] {
+      transform: translateX(0);
+    }
+    
+    .watchlist-sidebar,
+    [class*="w-[300px]"] {
+      transform: translateX(0);
+    }
+    
+    /* Reset content padding */
+    .chat-area,
+    [class*="flex-col h-screen bg-[#161921]"] {
+      padding-top: 0;
+    }
+  }

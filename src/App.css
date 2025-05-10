@@ -1,0 +1,86 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+.search-icon {
+  border-radius: 50%;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 45px;
+  height: 45px;
+}
+
+
+/* .chat-icon {
+  width: 80px;
+  height: 50px;
+} */
+
+
+.ml-72 {
+  margin-left: 0 !important;
+}
+
+.from-card-bg {
+  height: 110px;
+}
+.from-card-bg h3 {
+  font-weight: bold;
+}
+.price-box {
+  line-height: 1.9rem;
+  background-color: #161b25;
+}
+.watchlist-btns button {
+  line-height: 1.5rem;
+  font-size: 15px;
+  font-weight: 500;
+  background-color: #161b25;
+  border: 1px solid #444;
+}
+.bg-sidebar-bg {
+  background-color: #161b25 !important;
+}
+
+.font-bold {
+  font-weight: 700 !important;
+}
+.bg-sidebar-bg  {
+  width: 300px !important;
+  border-right: 1px solid #3a3a4c;
+}
+form input {
+  min-height: 65px;
+  border-radius: 10px !important;
+}
+.watchlist {
+  width: 300px !important;
+}
+.list-item i {
+  font-size: 22px;
+}
+.bg-input-bg:focus {
+  border-color: rgb(59 130 246) !important;
+}
+.text-primary-accent {
+  color: rgb(59 130 246) !important;
+}
+.bg-primary-accent {
+  background-color: rgb(59 130 246) !important;
+}
+.bg-primary-accent\/15 {
+  background-color: #384457 !important;
+}
+
+.ticker-chart {
+  background: #141414;
+  padding: 20px 5px;
+}
+.bi-robot {
+  width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
