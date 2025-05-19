@@ -11,10 +11,12 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
   const [chatSessions, setChatSessions] = useState([]);
+  const token = new URLSearchParams(window.location.search).get("token");
+
   const [activeSessionId, setActiveSessionId] = useState(null);
 
-  const OPENROUTER_API_KEY =
-    "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";
+  // const OPENROUTER_API_KEY =
+  //   "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";
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
   const promptCards = [
@@ -114,28 +116,67 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setApiError(null);
     try {
       const response = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
+        `${BACKEND_URL}/proxy/openrouter/?token=${token}`,
         {
-          model: "deepseek/deepseek-chat:free",
-          messages: [{ role: "user", content: messageText }],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
-            // "HTTP-Referer": window.location.origin,
-            "X-Title": "TradeGPT Chat",
-          },
+          model: "deepseek-r1:1.5b",
+          messages: [
+            {
+              role: "system",
+              content: `You are TradeGPT, an expert financial and trading assistant with access to real-time market data.
+
+IMPORTANT DISPLAY INSTRUCTIONS:
+1. When provided with market data, ALWAYS display ALL metrics exactly as received from the backend.
+2. Format financial data in a clear, structured way using markdown tables and sections.
+3. For price data, always include: Current Price, Change (%), Open, High, Low, Volume, and any other metrics provided.
+4. For historical data, present it in chronological order with all available metrics.
+5. NEVER omit or modify any numerical data provided by the backend.
+
+ANALYSIS INSTRUCTIONS:
+1. After displaying the raw data, provide a concise but thorough analysis of the metrics.
+2. Identify key trends, patterns, support/resistance levels, and notable indicators.
+3. Mention relevant market events that might be affecting the asset.
+4. When appropriate, reference fundamental factors like earnings, industry trends, or macroeconomic conditions.
+5. Conclude with balanced insights about potential future movements, noting both bullish and bearish factors.`,
+            },
+            { role: "user", content: messageText },
+          ],
+          stream: false,
         }
       );
-      return response.data.choices?.[0]?.message?.content || "No response.";
+      return response.data.message || response.data.content || "No response.";
     } catch (error) {
-      console.error("OpenRouter error:", error);
-      setApiError("Due to high demand our service currently unavailable");
-      return "Due to high demand our service currently unavailable";
+      console.error("Ollama Proxy Error:", error);
+      setApiError("AI service is currently unavailable");
+      return "AI service is currently unavailable.";
     }
   };
+
+  // const callOpenRouterAPI = async (messageText) => {
+  //   setApiError(null);
+  //   try {
+  //     const response = await axios.post(
+  //       "https://openrouter.ai/api/v1/chat/completions",
+  //       {
+  //         model: "deepseek/deepseek-chat:free",
+  //         messages: [{ role: "user", content: messageText }],
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+  //           "Content-Type": "application/json",
+  //           "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
+  //           // "HTTP-Referer": window.location.origin,
+  //           "X-Title": "TradeGPT Chat",
+  //         },
+  //       }
+  //     );
+  //     return response.data.choices?.[0]?.message?.content || "No response.";
+  //   } catch (error) {
+  //     console.error("OpenRouter error:", error);
+  //     setApiError("Due to high demand our service currently unavailable");
+  //     return "Due to high demand our service currently unavailable";
+  //   }
+  // };
 
   const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
     const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
@@ -150,31 +191,68 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       const summary = `${symbol} is trading at $${data.c}, change: ${data.d} (${data.dp}%).`;
 
       const aiRes = await axios.post(
-        "https://openrouter.ai/api/v1/chat/completions",
+        `${BACKEND_URL}/proxy/openrouter/?token=${token}`,
         {
-          model: "deepseek/deepseek-chat:free",
+          model: "deepseek-r1:1.5b",
           messages: [
+            {
+              role: "system",
+              content: `You are TradeGPT, an expert financial and trading assistant with access to real-time market data. Your job is to interpret the following stock metrics without omitting any value.`,
+            },
             {
               role: "user",
               content: `Stock info for ${symbol}: ${summary}. What does this mean for traders?`,
             },
           ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
-            "X-Title": "Stock Analysis Chat",
-          },
+          stream: false,
         }
       );
-      return aiRes.data.choices?.[0]?.message?.content || "AI gave no answer.";
+
+      return aiRes.data.message || aiRes.data.content || "No AI response.";
     } catch (error) {
-      console.error("Finnhub or OpenRouter error:", error);
+      console.error("Finnhub/Ollama Proxy Error:", error);
       return `Error retrieving info for ${symbol}.`;
     }
   };
+
+  // const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
+  //   const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
+  //   const symbol = match?.[1]?.toUpperCase();
+  //   if (!symbol) return "Invalid stock symbol.";
+
+  //   try {
+  //     const stockRes = await axios.get(
+  //       `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+  //     );
+  //     const data = stockRes.data;
+  //     const summary = `${symbol} is trading at $${data.c}, change: ${data.d} (${data.dp}%).`;
+
+  //     const aiRes = await axios.post(
+  //       "https://openrouter.ai/api/v1/chat/completions",
+  //       {
+  //         model: "deepseek/deepseek-chat:free",
+  //         messages: [
+  //           {
+  //             role: "user",
+  //             content: `Stock info for ${symbol}: ${summary}. What does this mean for traders?`,
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+  //           "Content-Type": "application/json",
+  //           "HTTP-Referer": "https://frontend-eight-rho-95.vercel.app",
+  //           "X-Title": "Stock Analysis Chat",
+  //         },
+  //       }
+  //     );
+  //     return aiRes.data.choices?.[0]?.message?.content || "AI gave no answer.";
+  //   } catch (error) {
+  //     console.error("Finnhub or OpenRouter error:", error);
+  //     return `Error retrieving info for ${symbol}.`;
+  //   }
+  // };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
