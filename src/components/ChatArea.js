@@ -10,6 +10,8 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const [apiError, setApiError] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
+  const [chatSessions, setChatSessions] = useState([]);
+  const [activeSessionId, setActiveSessionId] = useState(null);
 
   const OPENROUTER_API_KEY =
     "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";
@@ -45,6 +47,24 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  useEffect(() => {
+    if (token) {
+      axios
+        .get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
+        .then((res) => {
+          setChatSessions(res.data);
+        });
+    }
+  }, [token]);
+
+  const loadSession = async (session_id) => {
+    setSessionId(session_id);
+    setActiveSessionId(session_id);
+    const res = await axios.get(
+      `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
+    );
+    setMessages(res.data);
+  };
 
   const handleSendWatchlistMessage = async (msg) => {
     const userMsg = {
