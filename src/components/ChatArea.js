@@ -116,7 +116,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setApiError(null);
     try {
       const response = await axios.post(
-        `${BACKEND_URL}/proxy/openrouter/?token=${token}`,
+        `${BACKEND_URL}/api/proxy/openrouter/?token=${token}`,
         {
           model: "deepseek-r1:1.5b",
           messages: [
@@ -191,7 +191,7 @@ ANALYSIS INSTRUCTIONS:
       const summary = `${symbol} is trading at $${data.c}, change: ${data.d} (${data.dp}%).`;
 
       const aiRes = await axios.post(
-        `${BACKEND_URL}/proxy/openrouter/?token=${token}`,
+        `${BACKEND_URL}/api/proxy/openrouter/?token=${token}`,
         {
           model: "deepseek-r1:1.5b",
           messages: [
