@@ -875,17 +875,14 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const callOpenRouterAPI = async (messageText) => {
     setApiError(null);
     try {
+      const prompt = `SYSTEM: You are TradeGPT, an expert in finance and trading.\n\nUSER: ${messageText}\n\nASSISTANT:`;
       const response = await axios.post(
         `${BACKEND_URL}/api/proxy/openrouter/?token=${token}`,
         {
-          model: "deepseek-r1:1.5b",
-          messages: [
-            {
-              role: "system",
-              content: `You are TradeGPT, an expert financial and trading assistant...`,
-            },
-            { role: "user", content: messageText },
-          ],
+          model: "meta-llama/Meta-Llama-3-8B-Instruct",
+          inputs: {
+            prompt: prompt,
+          },
           stream: false,
         }
       );
@@ -896,6 +893,31 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       return "AI service is currently unavailable.";
     }
   };
+
+  // const callOpenRouterAPI = async (messageText) => {
+  //   setApiError(null);
+  //   try {
+  //     const response = await axios.post(
+  //       `${BACKEND_URL}/api/proxy/openrouter/?token=${token}`,
+  //       {
+  //         model: "deepseek-r1:1.5b",
+  //         messages: [
+  //           {
+  //             role: "system",
+  //             content: `You are TradeGPT, an expert financial and trading assistant...`,
+  //           },
+  //           { role: "user", content: messageText },
+  //         ],
+  //         stream: false,
+  //       }
+  //     );
+  //     return response.data.message || response.data.content || "No response.";
+  //   } catch (error) {
+  //     console.error("Ollama Proxy Error:", error);
+  //     setApiError("AI service is currently unavailable");
+  //     return "AI service is currently unavailable.";
+  //   }
+  // };
 
   const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
     const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
