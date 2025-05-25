@@ -883,7 +883,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           inputs: {
             prompt: prompt,
           },
-          stream: false,
+          stream: true,
         }
       );
       return response.data.message || response.data.content || "No response.";
