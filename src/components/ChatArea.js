@@ -148,11 +148,20 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
+  // useEffect(() => {
+  //   if (watchlistMessage && watchlistMessage.trim()) {
+  //     handleSendWatchlistMessage(watchlistMessage);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [watchlistMessage]);
+
   useEffect(() => {
-    if (watchlistMessage && watchlistMessage.trim()) {
+    if (
+      (typeof watchlistMessage === "string" && watchlistMessage.trim()) ||
+      (typeof watchlistMessage === "object" && watchlistMessage !== null)
+    ) {
       handleSendWatchlistMessage(watchlistMessage);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchlistMessage]);
 
   const scrollToBottom = () => {
