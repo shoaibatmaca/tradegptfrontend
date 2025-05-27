@@ -654,43 +654,6 @@ const StockWatchlist = ({ sendMessageToChat }) => {
   // Finnhub API key
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
-  // Function to get stock quote from Finnhub
-  // const getStockQuote = async (symbol) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
-  //     );
-
-  //     if (response.status !== 200) {
-  //       throw new Error(`API error: ${response.status}`);
-  //     }
-
-  //     const data = response.data;
-
-  //     // Check if we got valid data
-  //     if (data && data.c > 0) {
-  //       // Format the response
-  //       return {
-  //         symbol: symbol,
-  //         price: data.c.toFixed(2), // Current price
-  //         open: data.o.toFixed(4), // Open price of the day
-  //         high: data.h.toFixed(4), // High price of the day
-  //         low: data.l.toFixed(4), // Low price of the day
-  //         previousClose: data.pc.toFixed(4), // Previous close price
-  //         change: (data.c - data.pc).toFixed(2), // Change
-  //         changePercent: (((data.c - data.pc) / data.pc) * 100).toFixed(2), // Change percent
-  //         volume: Math.round(data.v).toLocaleString(), // Volume
-  //         sparkline: data.c >= data.pc ? "up" : "down", // Trend direction
-  //       };
-  //     }
-
-  //     return null;
-  //   } catch (error) {
-  //     console.error(`Error fetching quote for ${symbol}:`, error);
-  //     throw error;
-  //   }
-  // };
-
   const ALPHA_API_KEY = "04RGF1U9PAJ49VYI";
 
   const getStockQuote = async (symbol) => {
@@ -931,30 +894,40 @@ const StockWatchlist = ({ sendMessageToChat }) => {
     }
   };
 
-  // Handle button clicks in watchlist and send a message to chat
-  const handleWatchlistButtonClick = (buttonType, symbol) => {
-    let message = "";
+  const handleWatchlistButtonClick = async (buttonType, symbol) => {
+    const tickerData = watchlist.find((t) => t.symbol === symbol);
+    if (!tickerData) return;
 
-    switch (buttonType) {
-      case "priceChart":
-        message = `Show me the price chart for ${symbol}`;
-        break;
-      case "recentNews":
-        message = `What's the recent news on ${symbol}?`;
-        break;
-      case "tradeIdeas":
-        message = `Give me some trade ideas for ${symbol}`;
-        break;
-      case "analysis":
-        message = `Provide technical analysis for ${symbol}`;
-        break;
-      default:
-        message = `Information about ${symbol}`;
-    }
+    // Map buttonType to human-readable query
+    const queryMap = {
+      priceChart: `Show me the price chart for ${symbol}`,
+      recentNews: `What's the recent news on ${symbol}?`,
+      tradeIdeas: `Give me some trade ideas for ${symbol}`,
+      analysis: `Provide technical analysis for ${symbol}`,
+    };
 
-    console.log(`Sending message to chat: ${message}`);
-    // Send message to chat component via prop
-    sendMessageToChat(message);
+    const news = await getCompanyNews(symbol);
+
+    const payload = {
+      symbol: tickerData.symbol,
+      name: tickerData.name,
+      price: tickerData.price,
+      open: tickerData.open,
+      high: tickerData.high,
+      low: tickerData.low,
+      previousClose: tickerData.previousClose,
+      volume: tickerData.volume,
+      trend: tickerData.sparkline,
+      queryType: queryMap[buttonType] || `Information about ${symbol}`,
+      news: news.map((n) => ({
+        headline: n.headline,
+        time: n.datetime.toISOString(),
+        category: n.category,
+      })),
+    };
+
+    // Send full context to DeepSeek
+    sendMessageToChat(payload);
   };
 
   // Open URL in a new tab
@@ -1121,19 +1094,6 @@ const StockWatchlist = ({ sendMessageToChat }) => {
                       <div className="text-gray-400">Prev Close:</div>
                       <div className="text-right">${ticker.previousClose}</div>
                     </div>
-                    {/* <div className="mt-2 text-center">
-                      <a
-                        href={`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker.symbol}&apikey=demo&datatype=csv`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 flex items-center justify-center gap-1"
-                      >
-                        View Historical Data 
-                        <svg viewBox="0 0 24 24" width="12" height="12">
-                          <path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"></path>
-                        </svg>
-                      </a>
-                    </div> */}
                   </div>
 
                   {/* News Section */}

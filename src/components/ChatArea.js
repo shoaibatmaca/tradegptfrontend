@@ -106,48 +106,47 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   //     setIsLoading(false);
   //   }
   // };
-const handleSendWatchlistMessage = async (msg) => {
-  setIsLoading(true);
+  // FRONTEND - watchlist.js/chat.js
+  const handleSendWatchlistMessage = async (msg) => {
+    setIsLoading(true);
 
-  try {
-    let aiText;
+    try {
+      let aiText;
 
-    if (typeof msg === "string") {
-      // Fallback to OpenRouter API if it's just text
-      aiText = await callOpenRouterAPI(msg);
-    } else if (typeof msg === "object") {
-      const response = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
-      aiText = response.data.message;
-    } else {
-      aiText = "Invalid watchlist message format.";
+      if (typeof msg === "object") {
+        // Forward object to DeepSeek endpoint with full financial data
+        const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
+        aiText = res.data.message;
+      } else {
+        // Default text-based prompt (fallback)
+        aiText = await callOpenRouterAPI(msg);
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: aiText,
+          sender: "ai",
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err) {
+      console.error("AI Error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          text: "Failed to get AI response.",
+          sender: "ai",
+          timestamp: new Date(),
+          isError: true,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        text: aiText,
-        sender: "ai",
-        timestamp: new Date(),
-      },
-    ]);
-  } catch (err) {
-    console.error("Error handling watchlist message:", err);
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        text: "Failed to get AI response.",
-        sender: "ai",
-        timestamp: new Date(),
-        isError: true,
-      },
-    ]);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     if (watchlistMessage && watchlistMessage.trim()) {
@@ -183,7 +182,6 @@ const handleSendWatchlistMessage = async (msg) => {
       return "AI service is currently unavailable.";
     }
   };
-
 
   const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
     const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
