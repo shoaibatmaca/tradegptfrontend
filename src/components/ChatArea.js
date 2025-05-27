@@ -627,16 +627,49 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
+      // let fullText = "";
+
+      // while (true) {
+      //   const { done, value } = await reader.read();
+      //   if (done) break;
+      //   const chunk = decoder.decode(value, { stream: true });
+
+      //   // const chunk = decoder.decode(value);
+      //   fullText += chunk;
+
+      //   setMessages((prev) =>
+      //     prev.map((m) =>
+      //       m.id === streamId ? { ...m, partialText: fullText } : m
+      //     )
+      //   );
+      // }
       let fullText = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
 
-        // const chunk = decoder.decode(value);
-        fullText += chunk;
+        // Flush the buffer in intervals (like streaming)
+        if (buffer.length > 10) {
+          fullText += buffer;
+          buffer = "";
 
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === streamId ? { ...m, partialText: fullText } : m
+            )
+          );
+
+          await new Promise((r) => setTimeout(r, 30)); // <-- delay to simulate streaming
+        }
+      }
+
+      // Flush any remaining buffer
+      if (buffer.length > 0) {
+        fullText += buffer;
         setMessages((prev) =>
           prev.map((m) =>
             m.id === streamId ? { ...m, partialText: fullText } : m
