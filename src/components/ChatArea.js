@@ -477,30 +477,112 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
+  // const handleSendWatchlistMessage = async (msg) => {
+  //   setIsLoading(true);
+
+  //   try {
+  //     let aiText;
+
+  //     if (typeof msg === "object") {
+  //       // Forward object to DeepSeek endpoint with full financial data
+  //       const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
+  //       aiText = res.data.message;
+  //     } else {
+  //       // Default text-based prompt (fallback)
+  //       aiText = await callOpenRouterAPI(msg);
+  //     }
+
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         id: prev.length + 1,
+  //         text: aiText,
+  //         sender: "ai",
+  //         timestamp: new Date(),
+  //       },
+  //     ]);
+  //   } catch (err) {
+  //     console.error("AI Error:", err);
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         id: prev.length + 1,
+  //         text: "Failed to get AI response.",
+  //         sender: "ai",
+  //         timestamp: new Date(),
+  //         isError: true,
+  //       },
+  //     ]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleSendWatchlistMessage = async (msg) => {
     setIsLoading(true);
 
+    // Step 1: Initial loading stage message
+    const baseId = Date.now();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: baseId,
+        sender: "ai",
+        stage: "progress",
+        steps: [
+          { text: "Retrieved detailed company information.", done: false },
+          { text: "Retrieved fundamental ratios for the stock.", done: false },
+          {
+            text: "Retrieved company earnings reports information.",
+            done: false,
+          },
+          { text: "Consolidating and analyzing information...", done: false },
+        ],
+        timestamp: new Date(),
+      },
+    ]);
+
     try {
-      let aiText;
+      // Wait before updating each step
+      const updateStep = (stepIndex) =>
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === baseId
+              ? {
+                  ...msg,
+                  steps: msg.steps.map((s, i) =>
+                    i === stepIndex ? { ...s, done: true } : s
+                  ),
+                }
+              : msg
+          )
+        );
 
-      if (typeof msg === "object") {
-        // Forward object to DeepSeek endpoint with full financial data
-        const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
-        aiText = res.data.message;
-      } else {
-        // Default text-based prompt (fallback)
-        aiText = await callOpenRouterAPI(msg);
-      }
+      await new Promise((r) => setTimeout(r, 700));
+      updateStep(0);
+      await new Promise((r) => setTimeout(r, 700));
+      updateStep(1);
+      await new Promise((r) => setTimeout(r, 700));
+      updateStep(2);
+      await new Promise((r) => setTimeout(r, 1000));
+      updateStep(3);
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: prev.length + 1,
-          text: aiText,
-          sender: "ai",
-          timestamp: new Date(),
-        },
-      ]);
+      // Fetch AI response
+      const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
+      const aiText = res.data.message;
+
+      // Replace staged message with final AI message
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === baseId
+            ? {
+                ...m,
+                stage: "final",
+                text: aiText,
+              }
+            : m
+        )
+      );
     } catch (err) {
       console.error("AI Error:", err);
       setMessages((prev) => [
@@ -732,21 +814,33 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                       : "bg-card-bg text-primary-text rounded-tl-none"
                   }`}
                 >
-                  {/* <p className="whitespace-pre-line">{msg.text}</p> */}
-                  {/* <div
-                    className="prose prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: DOMPurify.sanitize(marked.parse(msg.text || "")),
-                    }}
-                  ></div> */}
-
-                  <ReactMarkdown className="prose prose-invert max-w-none">
-                    {msg.text}
-                  </ReactMarkdown>
+                  {msg.stage === "progress" ? (
+                    <div className="space-y-1 text-sm text-gray-300">
+                      {msg.steps.map((step, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <i
+                            className={`bi ${
+                              step.done
+                                ? "bi-check-circle-fill text-green-400"
+                                : "bi-arrow-repeat animate-spin text-yellow-400"
+                            }`}
+                          ></i>
+                          <span>{step.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : msg.stage === "final" ? (
+                    <ReactMarkdown className="prose prose-invert max-w-none">
+                      {msg.text}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="whitespace-pre-line">{msg.text}</p>
+                  )}
                 </div>
               </div>
             </div>
           ))}
+
           <div ref={messagesEndRef} />
         </div>
       )}
