@@ -111,94 +111,94 @@
 //     return symbol + " Corporation";
 //   };
 
-//   // Handle search
-//   const handleSearch = async () => {
-//     if (!searchQuery.trim()) return;
+// // Handle search
+// const handleSearch = async () => {
+//   if (!searchQuery.trim()) return;
 
-//     const symbol = searchQuery.trim().toUpperCase();
-//     setIsLoading(true);
-//     setError("");
+//   const symbol = searchQuery.trim().toUpperCase();
+//   setIsLoading(true);
+//   setError("");
+//   setIsLoadingNews(true);
+
+//   try {
+//     const stockData = await getStockQuote(symbol);
+
+//     if (stockData) {
+//       // Add company name
+//       stockData.name = getCompanyName(symbol);
+
+//       // Set as current stock
+//       setCurrentStock(stockData);
+
+//       // Check if it's already in watchlist
+//       const existingIndex = watchlist.findIndex(
+//         (item) => item.symbol === symbol
+//       );
+//       if (existingIndex === -1) {
+//         // Add to watchlist if not already there
+//         setWatchlist((prev) => [...prev, stockData]);
+//       } else {
+//         // Update existing entry
+//         setWatchlist((prev) => {
+//           const newList = [...prev];
+//           newList[existingIndex] = stockData;
+//           return newList;
+//         });
+//       }
+
+//       // Expand the ticker
+//       setExpandedTicker(symbol);
+
+//       // Fetch news for this ticker
+//       const news = await getCompanyNews(symbol);
+//       setNewsItems(news);
+//     } else {
+//       setError(`No data found for ${symbol}`);
+//     }
+//   } catch (error) {
+//     setError(`Error fetching data for ${symbol}`);
+//     console.error(error);
+//   } finally {
+//     setIsLoading(false);
+//     setIsLoadingNews(false);
+//   }
+// };
+
+// // Handle key press in search box
+// const handleKeyPress = (e) => {
+//   if (e.key === "Enter") {
+//     handleSearch();
+//   }
+// };
+
+// // Toggle expanded ticker
+// const toggleExpandTicker = async (symbol) => {
+//   if (expandedTicker === symbol) {
+//     setExpandedTicker(null);
+//   } else {
+//     setExpandedTicker(symbol);
 //     setIsLoadingNews(true);
 
+//     // Fetch news when expanding a ticker
 //     try {
-//       const stockData = await getStockQuote(symbol);
-
-//       if (stockData) {
-//         // Add company name
-//         stockData.name = getCompanyName(symbol);
-
-//         // Set as current stock
-//         setCurrentStock(stockData);
-
-//         // Check if it's already in watchlist
-//         const existingIndex = watchlist.findIndex(
-//           (item) => item.symbol === symbol
-//         );
-//         if (existingIndex === -1) {
-//           // Add to watchlist if not already there
-//           setWatchlist((prev) => [...prev, stockData]);
-//         } else {
-//           // Update existing entry
-//           setWatchlist((prev) => {
-//             const newList = [...prev];
-//             newList[existingIndex] = stockData;
-//             return newList;
-//           });
-//         }
-
-//         // Expand the ticker
-//         setExpandedTicker(symbol);
-
-//         // Fetch news for this ticker
-//         const news = await getCompanyNews(symbol);
-//         setNewsItems(news);
-//       } else {
-//         setError(`No data found for ${symbol}`);
-//       }
+//       const news = await getCompanyNews(symbol);
+//       setNewsItems(news);
 //     } catch (error) {
-//       setError(`Error fetching data for ${symbol}`);
-//       console.error(error);
+//       console.error(`Error fetching news for ${symbol}:`, error);
 //     } finally {
-//       setIsLoading(false);
 //       setIsLoadingNews(false);
 //     }
-//   };
+//   }
+// };
 
-//   // Handle key press in search box
-//   const handleKeyPress = (e) => {
-//     if (e.key === "Enter") {
-//       handleSearch();
-//     }
-//   };
-
-//   // Toggle expanded ticker
-//   const toggleExpandTicker = async (symbol) => {
-//     if (expandedTicker === symbol) {
-//       setExpandedTicker(null);
-//     } else {
-//       setExpandedTicker(symbol);
-//       setIsLoadingNews(true);
-
-//       // Fetch news when expanding a ticker
-//       try {
-//         const news = await getCompanyNews(symbol);
-//         setNewsItems(news);
-//       } catch (error) {
-//         console.error(`Error fetching news for ${symbol}:`, error);
-//       } finally {
-//         setIsLoadingNews(false);
-//       }
-//     }
-//   };
-
-//   // Remove ticker from watchlist
-//   const removeFromWatchlist = (symbol) => {
-//     setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
-//     if (expandedTicker === symbol) {
-//       setExpandedTicker(null);
-//       setNewsItems([]);
-//     }
-//   };
+// // Remove ticker from watchlist
+// const removeFromWatchlist = (symbol) => {
+//   setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
+//   if (expandedTicker === symbol) {
+//     setExpandedTicker(null);
+//     setNewsItems([]);
+//   }
+// };
 
 //   // Format date for news items
 //   const formatNewsDate = (date) => {
@@ -736,6 +736,95 @@ const StockWatchlist = ({ sendMessageToChat }) => {
     };
 
     return companies[symbol] || `${symbol} Corporation`;
+  };
+
+  // Handle search
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    const symbol = searchQuery.trim().toUpperCase();
+    setIsLoading(true);
+    setError("");
+    setIsLoadingNews(true);
+
+    try {
+      const stockData = await getStockQuote(symbol);
+
+      if (stockData) {
+        // Add company name
+        stockData.name = getCompanyName(symbol);
+
+        // Set as current stock
+        setCurrentStock(stockData);
+
+        // Check if it's already in watchlist
+        const existingIndex = watchlist.findIndex(
+          (item) => item.symbol === symbol
+        );
+        if (existingIndex === -1) {
+          // Add to watchlist if not already there
+          setWatchlist((prev) => [...prev, stockData]);
+        } else {
+          // Update existing entry
+          setWatchlist((prev) => {
+            const newList = [...prev];
+            newList[existingIndex] = stockData;
+            return newList;
+          });
+        }
+
+        // Expand the ticker
+        setExpandedTicker(symbol);
+
+        // Fetch news for this ticker
+        const news = await getCompanyNews(symbol);
+        setNewsItems(news);
+      } else {
+        setError(`No data found for ${symbol}`);
+      }
+    } catch (error) {
+      setError(`Error fetching data for ${symbol}`);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingNews(false);
+    }
+  };
+
+  // Handle key press in search box
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  // Toggle expanded ticker
+  const toggleExpandTicker = async (symbol) => {
+    if (expandedTicker === symbol) {
+      setExpandedTicker(null);
+    } else {
+      setExpandedTicker(symbol);
+      setIsLoadingNews(true);
+
+      // Fetch news when expanding a ticker
+      try {
+        const news = await getCompanyNews(symbol);
+        setNewsItems(news);
+      } catch (error) {
+        console.error(`Error fetching news for ${symbol}:`, error);
+      } finally {
+        setIsLoadingNews(false);
+      }
+    }
+  };
+
+  // Remove ticker from watchlist
+  const removeFromWatchlist = (symbol) => {
+    setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol));
+    if (expandedTicker === symbol) {
+      setExpandedTicker(null);
+      setNewsItems([]);
+    }
   };
 
   const handleWatchlistButtonClick = async (buttonType, symbol) => {
