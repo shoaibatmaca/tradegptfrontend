@@ -655,39 +655,77 @@ const StockWatchlist = ({ sendMessageToChat }) => {
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
   // Function to get stock quote from Finnhub
+  // const getStockQuote = async (symbol) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+  //     );
+
+  //     if (response.status !== 200) {
+  //       throw new Error(`API error: ${response.status}`);
+  //     }
+
+  //     const data = response.data;
+
+  //     // Check if we got valid data
+  //     if (data && data.c > 0) {
+  //       // Format the response
+  //       return {
+  //         symbol: symbol,
+  //         price: data.c.toFixed(2), // Current price
+  //         open: data.o.toFixed(4), // Open price of the day
+  //         high: data.h.toFixed(4), // High price of the day
+  //         low: data.l.toFixed(4), // Low price of the day
+  //         previousClose: data.pc.toFixed(4), // Previous close price
+  //         change: (data.c - data.pc).toFixed(2), // Change
+  //         changePercent: (((data.c - data.pc) / data.pc) * 100).toFixed(2), // Change percent
+  //         volume: Math.round(data.v).toLocaleString(), // Volume
+  //         sparkline: data.c >= data.pc ? "up" : "down", // Trend direction
+  //       };
+  //     }
+
+  //     return null;
+  //   } catch (error) {
+  //     console.error(`Error fetching quote for ${symbol}:`, error);
+  //     throw error;
+  //   }
+  // };
+
+  const ALPHA_API_KEY = "04RGF1U9PAJ49VYI";
+
   const getStockQuote = async (symbol) => {
     try {
       const response = await axios.get(
-        `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+        `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${ALPHA_API_KEY}`
       );
-
-      if (response.status !== 200) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
       const data = response.data;
+      const timeSeries = data["Time Series (Daily)"];
+      if (!timeSeries) throw new Error("Invalid Alpha Vantage price data");
 
-      // Check if we got valid data
-      if (data && data.c > 0) {
-        // Format the response
-        return {
-          symbol: symbol,
-          price: data.c.toFixed(2), // Current price
-          open: data.o.toFixed(4), // Open price of the day
-          high: data.h.toFixed(4), // High price of the day
-          low: data.l.toFixed(4), // Low price of the day
-          previousClose: data.pc.toFixed(4), // Previous close price
-          change: (data.c - data.pc).toFixed(2), // Change
-          changePercent: (((data.c - data.pc) / data.pc) * 100).toFixed(2), // Change percent
-          volume: Math.round(data.v).toLocaleString(), // Volume
-          sparkline: data.c >= data.pc ? "up" : "down", // Trend direction
-        };
-      }
+      const [latestDate, previousDate] = Object.keys(timeSeries);
+      const today = timeSeries[latestDate];
+      const previous = timeSeries[previousDate];
 
-      return null;
+      const closeToday = parseFloat(today["4. close"]);
+      const closePrev = parseFloat(previous["4. close"]);
+
+      return {
+        symbol,
+        price: closeToday.toFixed(2),
+        open: parseFloat(today["1. open"]).toFixed(4),
+        high: parseFloat(today["2. high"]).toFixed(4),
+        low: parseFloat(today["3. low"]).toFixed(4),
+        previousClose: closePrev.toFixed(4),
+        change: (closeToday - closePrev).toFixed(2),
+        changePercent: (((closeToday - closePrev) / closePrev) * 100).toFixed(
+          2
+        ),
+        volume: parseInt(today["6. volume"]).toLocaleString(),
+        sparkline: closeToday >= closePrev ? "up" : "down",
+      };
     } catch (error) {
-      console.error(`Error fetching quote for ${symbol}:`, error);
-      throw error;
+      console.error(`Alpha Vantage quote fetch error for ${symbol}:`, error);
+      return null;
     }
   };
 
