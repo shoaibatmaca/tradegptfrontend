@@ -401,6 +401,7 @@
 
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 import PromptCard from "./PromptCard";
 
@@ -732,16 +733,16 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                   }`}
                 >
                   {/* <p className="whitespace-pre-line">{msg.text}</p> */}
-                  <div
+                  {/* <div
                     className="prose prose-invert max-w-none"
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(marked.parse(msg.text || "")),
                     }}
-                  ></div>
-                  {/* 
+                  ></div> */}
+
                   <ReactMarkdown className="prose prose-invert max-w-none">
                     {msg.text}
-                  </ReactMarkdown> */}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
