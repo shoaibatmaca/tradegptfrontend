@@ -400,8 +400,6 @@
 // export default ChatArea;
 
 import axios from "axios";
-import DOMPurify from "dompurify";
-import { marked } from "marked";
 import { useEffect, useRef, useState } from "react";
 import PromptCard from "./PromptCard";
 
@@ -541,7 +539,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         inputs: {
           prompt: prompt,
         },
-        stream: true,
+        stream: false,
       });
       return response.data.message || response.data.content || "No response.";
     } catch (error) {
@@ -733,12 +731,16 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                   }`}
                 >
                   {/* <p className="whitespace-pre-line">{msg.text}</p> */}
-                  <div
+                  {/* <div
                     className="prose prose-invert max-w-none"
                     dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(marked.parse(msg.text || "")),
                     }}
-                  ></div>
+                  ></div> */}
+
+                  <ReactMarkdown className="prose prose-invert max-w-none">
+                    {msg.text}
+                  </ReactMarkdown>
                 </div>
               </div>
             </div>
