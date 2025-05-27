@@ -401,6 +401,8 @@
 
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+
 import PromptCard from "./PromptCard";
 
 const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
