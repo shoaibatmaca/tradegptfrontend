@@ -480,57 +480,55 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   // const handleSendWatchlistMessage = async (msg) => {
   //   setIsLoading(true);
 
-  //   // Step 1: Initial loading stage message
   //   const baseId = Date.now();
+  //   const steps = [
+  //     "Retrieved detailed company information.",
+  //     "Retrieved fundamental ratios for the stock.",
+  //     "Retrieved company earnings reports information.",
+  //     "Consolidating and analyzing information...",
+  //   ];
+
+  //   // Add base step message
   //   setMessages((prev) => [
   //     ...prev,
   //     {
   //       id: baseId,
   //       sender: "ai",
   //       stage: "progress",
-  //       steps: [
-  //         { text: "Retrieved detailed company information.", done: false },
-  //         { text: "Retrieved fundamental ratios for the stock.", done: false },
-  //         {
-  //           text: "Retrieved company earnings reports information.",
-  //           done: false,
-  //         },
-  //         { text: "Consolidating and analyzing information...", done: false },
-  //       ],
+  //       steps: steps.map((text) => ({ text, done: false })),
   //       timestamp: new Date(),
   //     },
   //   ]);
 
+  //   const updateStep = (stepIndex) => {
+  //     setMessages((prev) =>
+  //       prev.map((msg) =>
+  //         msg.id === baseId
+  //           ? {
+  //               ...msg,
+  //               steps: msg.steps.map((s, i) =>
+  //                 i === stepIndex ? { ...s, done: true } : s
+  //               ),
+  //             }
+  //           : msg
+  //       )
+  //     );
+  //   };
+
+  //   // Play steps 0–2 slowly
+  //   for (let i = 0; i < 3; i++) {
+  //     await new Promise((r) => setTimeout(r, 1200));
+  //     updateStep(i);
+  //   }
+
+  //   // Mark step 3 ("Consolidating...") but don’t resolve immediately
+  //   updateStep(3);
+
   //   try {
-  //     // Wait before updating each step
-  //     const updateStep = (stepIndex) =>
-  //       setMessages((prev) =>
-  //         prev.map((msg) =>
-  //           msg.id === baseId
-  //             ? {
-  //                 ...msg,
-  //                 steps: msg.steps.map((s, i) =>
-  //                   i === stepIndex ? { ...s, done: true } : s
-  //                 ),
-  //               }
-  //             : msg
-  //         )
-  //       );
-
-  //     await new Promise((r) => setTimeout(r, 700));
-  //     updateStep(0);
-  //     await new Promise((r) => setTimeout(r, 700));
-  //     updateStep(1);
-  //     await new Promise((r) => setTimeout(r, 700));
-  //     updateStep(2);
-  //     await new Promise((r) => setTimeout(r, 1000));
-  //     updateStep(3);
-
-  //     // Fetch AI response
   //     const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
   //     const aiText = res.data.message;
 
-  //     // Replace staged message with final AI message
+  //     // Replace staged message with final result
   //     setMessages((prev) =>
   //       prev.map((m) =>
   //         m.id === baseId
@@ -570,7 +568,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       "Consolidating and analyzing information...",
     ];
 
-    // Add base step message
+    // Step 1: Show initial steps
     setMessages((prev) => [
       ...prev,
       {
@@ -597,41 +595,69 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       );
     };
 
-    // Play steps 0–2 slowly
+    // Animate steps 0–2
     for (let i = 0; i < 3; i++) {
       await new Promise((r) => setTimeout(r, 1200));
       updateStep(i);
     }
 
-    // Mark step 3 ("Consolidating...") but don’t resolve immediately
+    // Step 3: Show final step and prepare to stream
     updateStep(3);
 
-    try {
-      const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
-      const aiText = res.data.message;
+    const streamId = `${baseId}-stream`;
 
-      // Replace staged message with final result
+    // Add initial streaming block
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: streamId,
+        sender: "ai",
+        stage: "streaming",
+        partialText: "",
+        timestamp: new Date(),
+      },
+    ]);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        fullText += chunk;
+
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === streamId ? { ...m, partialText: fullText } : m
+          )
+        );
+      }
+
+      // Final stage
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === baseId
-            ? {
-                ...m,
-                stage: "final",
-                text: aiText,
-              }
-            : m
+          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
         )
       );
     } catch (err) {
-      console.error("AI Error:", err);
+      console.error("Stream Error:", err);
       setMessages((prev) => [
         ...prev,
         {
-          id: prev.length + 1,
-          text: "Failed to get AI response.",
+          id: `${baseId}-error`,
           sender: "ai",
-          timestamp: new Date(),
+          text: "Streaming failed.",
           isError: true,
+          timestamp: new Date(),
         },
       ]);
     } finally {
