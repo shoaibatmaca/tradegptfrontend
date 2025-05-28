@@ -627,7 +627,22 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
+      // let fullText = "";
 
+      // while (true) {
+      //   const { done, value } = await reader.read();
+      //   if (done) break;
+      //   const chunk = decoder.decode(value, { stream: true });
+
+      //   // const chunk = decoder.decode(value);
+      //   fullText += chunk;
+
+      //   setMessages((prev) =>
+      //     prev.map((m) =>
+      //       m.id === streamId ? { ...m, partialText: fullText } : m
+      //     )
+      //   );
+      // }
       let fullText = "";
       let buffer = "";
 
@@ -924,7 +939,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                     </div>
                   ) : msg.stage === "final" ? (
                     <ReactMarkdown className="prose prose-invert max-w-none">
-                      {msg.text}
+                      {msg.partialText || ""}
                     </ReactMarkdown>
                   ) : (
                     <p className="whitespace-pre-line">{msg.text}</p>
