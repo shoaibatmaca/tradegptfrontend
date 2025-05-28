@@ -571,50 +571,29 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
 
-        // Clean spacing and line breaks
-        const cleaned = chunk
-          .replace(/\n{2,}/g, "\n\n")
-          .replace(/\s{2,}/g, " ");
-        fullText += cleaned;
+        const lines = buffer.split("\n");
 
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === streamId ? { ...m, partialText: fullText } : m
-          )
-        );
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
 
-        await new Promise((r) => setTimeout(r, 15)); // smooth streaming
+          if (line.startsWith("data:")) {
+            const text = line.replace("data:", "").trim();
+            fullText += text;
+
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === streamId ? { ...m, partialText: fullText } : m
+              )
+            );
+
+            await new Promise((r) => setTimeout(r, 20)); // Optional delay
+          }
+        }
+
+        buffer = ""; // clear the buffer after processing
       }
-
-      // while (true) {
-      //   const { done, value } = await reader.read();
-      //   if (done) break;
-
-      //   const chunk = decoder.decode(value, { stream: true });
-      //   buffer += chunk;
-
-      //   const lines = buffer.split("\n");
-
-      //   for (let i = 0; i < lines.length; i++) {
-      //     const line = lines[i].trim();
-
-      //     if (line.startsWith("data:")) {
-      //       const text = line.replace("data:", "").trim();
-      //       fullText += text;
-
-      //       setMessages((prev) =>
-      //         prev.map((m) =>
-      //           m.id === streamId ? { ...m, partialText: fullText } : m
-      //         )
-      //       );
-
-      //       await new Promise((r) => setTimeout(r, 20)); // Optional delay
-      //     }
-      //   }
-
-      //   buffer = ""; // clear the buffer after processing
-      // }
 
       // Flush any remaining buffer
       if (buffer.length > 0) {
