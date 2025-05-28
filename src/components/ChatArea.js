@@ -282,25 +282,14 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       );
     } catch (err) {
       console.error("Stream Error:", err);
-      // setMessages((prev) => [
-      //   ...prev,
-      //   {
-      //     id: `${baseId}-error`,
-      //     sender: "ai",
-      //     text: "Streaming failed.",
-      //     isError: true,
-      //     timestamp: new Date(),
-      //   },
-      // ]);
       setMessages((prev) => [
         ...prev,
         {
-          id: streamId,
+          id: `${baseId}-error`,
           sender: "ai",
-          stage: "streaming",
-          partialText: "",
+          text: "Streaming failed.",
+          isError: true,
           timestamp: new Date(),
-          queryType: msg.queryType || "default", // Pass queryType
         },
       ]);
     } finally {
@@ -420,6 +409,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           text: aiText,
           sender: "ai",
           timestamp: new Date(),
+          queryType: msg.queryType || "default", // Pass queryType
         },
       ]);
     } finally {
