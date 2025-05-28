@@ -888,7 +888,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.map((msg) => (
+          {/* {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${
@@ -939,10 +939,76 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                     </div>
                   ) : msg.stage === "final" ? (
                     <ReactMarkdown className="prose prose-invert max-w-none">
-                      {msg.partialText || ""}
+                      {msg.  || ""}
                     </ReactMarkdown>
                   ) : (
                     <p className="whitespace-pre-line">{msg.text}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))} */}
+
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`flex ${
+                  msg.sender === "user" ? "flex-row-reverse" : ""
+                } max-w-3xl`}
+              >
+                <div
+                  className={`rounded-full w-10 h-10 flex items-center justify-center ${
+                    msg.sender === "user"
+                      ? "bg-hover-bg text-primary-accent ml-3"
+                      : "bg-hover-bg text-blue-400 mr-3"
+                  }`}
+                >
+                  <i
+                    className={`bi ${
+                      msg.sender === "user" ? "bi-person-circle" : "bi-robot"
+                    } text-xl`}
+                  ></i>
+                </div>
+
+                <div
+                  className={`p-4 rounded-lg shadow ${
+                    msg.sender === "user"
+                      ? "bg-primary-accent text-white rounded-tr-none"
+                      : msg.isError
+                      ? "bg-red-900 bg-opacity-30 text-primary-text rounded-tl-none border border-red-400"
+                      : "bg-card-bg text-primary-text rounded-tl-none"
+                  }`}
+                >
+                  {msg.stage === "progress" ? (
+                    <div className="space-y-1 text-sm text-gray-300">
+                      {msg.steps.map((step, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <i
+                            className={`bi ${
+                              step.done
+                                ? "bi-check-circle-fill text-green-400"
+                                : "bi-arrow-repeat animate-spin text-yellow-400"
+                            }`}
+                          ></i>
+                          <span>{step.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : msg.stage === "streaming" ? (
+                    <pre className="whitespace-pre-wrap text-sm font-mono text-white">
+                      {msg.partialText || ""}
+                    </pre>
+                  ) : msg.stage === "final" ? (
+                    <ReactMarkdown className="prose prose-invert max-w-none">
+                      {msg.text || ""}
+                    </ReactMarkdown>
+                  ) : (
+                    <p className="whitespace-pre-line">{msg.text || ""}</p>
                   )}
                 </div>
               </div>
