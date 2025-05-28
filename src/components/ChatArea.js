@@ -162,28 +162,61 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       //     )
       //   );
       // }
-      const formatText = (rawText) => {
-        return rawText
-          .replace(/\*\*/g, "") // Remove **
-          .replace(/##+/g, "") // Remove ##
-          .replace(/(Trade Idea for .*?)–/gi, "\n### $1 –")
-          .replace(/Current Price\s*:/gi, "\n### Current Price:\n")
-          .replace(/Trend\s*:/gi, "\n### Trend:\n")
-          .replace(/Key Levels\s*:/gi, "\n### Key Levels:\n")
-          .replace(/Trade Setup\s*:/gi, "\n### Trade Setup:\n")
-          .replace(/Entry\s*:/gi, "\n### Entry:\n")
-          .replace(/Stop[-\s]?Loss\s*:/gi, "\n### Stop-Loss:\n")
-          .replace(/Target\s*:/gi, "\n### Target:\n")
+      // const formatText = (rawText) => {
+      //   return rawText
+      //     .replace(/\*\*/g, "") // Remove **
+      //     .replace(/##+/g, "") // Remove ##
+      //     .replace(/(Trade Idea for .*?)–/gi, "\n### $1 –")
+      //     .replace(/Current Price\s*:/gi, "\n### Current Price:\n")
+      //     .replace(/Trend\s*:/gi, "\n### Trend:\n")
+      //     .replace(/Key Levels\s*:/gi, "\n### Key Levels:\n")
+      //     .replace(/Trade Setup\s*:/gi, "\n### Trade Setup:\n")
+      //     .replace(/Entry\s*:/gi, "\n### Entry:\n")
+      //     .replace(/Stop[-\s]?Loss\s*:/gi, "\n### Stop-Loss:\n")
+      //     .replace(/Target\s*:/gi, "\n### Target:\n")
+      //     .replace(
+      //       /Technical Indicators.*?:/gi,
+      //       "\n### Technical Indicators & Reasoning:\n"
+      //     )
+      //     .replace(/Conclusion\s*:/gi, "\n### Conclusion:\n")
+      //     .replace(/Note\s*:/gi, "\n### Note:\n")
+      //     .replace(/\n{2,}/g, "\n\n")
+      //     .replace(/\s{2,}/g, " ")
+      //     .trim();
+      // };
+
+      function cleanAndFormat(text) {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, "$1") // remove bold
+          .replace(/\*(.*?)\*/g, "$1") // remove italic
+          .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // remove code formatting
+          .replace(/^#+\s*/gm, "") // remove markdown headers
+          .replace(/(?<=[a-z])(?=[A-Z])/g, " ") // space in camelCase
+          .replace(/([a-zA-Z]):([A-Za-z])/g, "$1: $2") // space after colons
+          .replace(/###\s*/g, "") // remove leading ###
+          .replace(/--+/g, "\n\n---\n\n") // format separators
+          .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –") // section title
+          .replace(/Current Price\s*:\s*/gi, "\n\n**Current Price:** ")
+          .replace(/Trend\s*:\s*/gi, "\n\n**Trend:** ")
+          .replace(/Key Levels\s*:\s*/gi, "\n\n**Key Levels:** ")
+          .replace(/Trade Setup\s*:\s*/gi, "\n\n### Trade Setup:\n")
           .replace(
-            /Technical Indicators.*?:/gi,
-            "\n### Technical Indicators & Reasoning:\n"
+            /Technical Rationale\s*:\s*/gi,
+            "\n\n### Technical Rationale:\n"
           )
-          .replace(/Conclusion\s*:/gi, "\n### Conclusion:\n")
-          .replace(/Note\s*:/gi, "\n### Note:\n")
-          .replace(/\n{2,}/g, "\n\n")
-          .replace(/\s{2,}/g, " ")
+          .replace(/Execution Plan\s*:\s*/gi, "\n\n### Execution Plan:\n")
+          .replace(
+            /Risk[-\s]Reward\s*Ratio\s*:\s*/gi,
+            "\n\n**Risk-Reward Ratio:** "
+          )
+          .replace(/Target\s*:\s*/gi, "\n\n**Target:** ")
+          .replace(/Stop[-\s]?Loss\s*:\s*/gi, "\n\n**Stop-Loss:** ")
+          .replace(/Entry\s*:\s*/gi, "\n\n**Entry:** ")
+          .replace(/Note\s*:\s*/gi, "\n\n**Note:** ")
+          .replace(/\n{2,}/g, "\n\n") // normalize spacing
+          .replace(/\s{2,}/g, " ") // reduce excessive spaces
           .trim();
-      };
+      }
 
       let fullText = "";
       let buffer = "";
@@ -203,13 +236,17 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
             // fullText += text;
-            fullText += text;
-            const formatted = formatText(fullText);
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === streamId ? { ...m, partialText: formatted } : m
-              )
-            );
+            // 2
+            // fullText += text;
+            // const formatted = formatText(fullText);
+            // setMessages((prev) =>
+            //   prev.map((m) =>
+            //     m.id === streamId ? { ...m, partialText: formatted } : m
+            //   )
+            // );
+            // 3
+            const cleaned = cleanAndFormat(text);
+            fullText += cleaned;
 
             setMessages((prev) =>
               prev.map((m) =>
