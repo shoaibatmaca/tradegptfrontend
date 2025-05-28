@@ -477,86 +477,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
-  // const handleSendWatchlistMessage = async (msg) => {
-  //   setIsLoading(true);
-
-  //   const baseId = Date.now();
-  //   const steps = [
-  //     "Retrieved detailed company information.",
-  //     "Retrieved fundamental ratios for the stock.",
-  //     "Retrieved company earnings reports information.",
-  //     "Consolidating and analyzing information...",
-  //   ];
-
-  //   // Add base step message
-  //   setMessages((prev) => [
-  //     ...prev,
-  //     {
-  //       id: baseId,
-  //       sender: "ai",
-  //       stage: "progress",
-  //       steps: steps.map((text) => ({ text, done: false })),
-  //       timestamp: new Date(),
-  //     },
-  //   ]);
-
-  //   const updateStep = (stepIndex) => {
-  //     setMessages((prev) =>
-  //       prev.map((msg) =>
-  //         msg.id === baseId
-  //           ? {
-  //               ...msg,
-  //               steps: msg.steps.map((s, i) =>
-  //                 i === stepIndex ? { ...s, done: true } : s
-  //               ),
-  //             }
-  //           : msg
-  //       )
-  //     );
-  //   };
-
-  //   // Play steps 0–2 slowly
-  //   for (let i = 0; i < 3; i++) {
-  //     await new Promise((r) => setTimeout(r, 1200));
-  //     updateStep(i);
-  //   }
-
-  //   // Mark step 3 ("Consolidating...") but don’t resolve immediately
-  //   updateStep(3);
-
-  //   try {
-  //     const res = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, msg);
-  //     const aiText = res.data.message;
-
-  //     // Replace staged message with final result
-  //     setMessages((prev) =>
-  //       prev.map((m) =>
-  //         m.id === baseId
-  //           ? {
-  //               ...m,
-  //               stage: "final",
-  //               text: aiText,
-  //             }
-  //           : m
-  //       )
-  //     );
-  //   } catch (err) {
-  //     console.error("AI Error:", err);
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       {
-  //         id: prev.length + 1,
-  //         text: "Failed to get AI response.",
-  //         sender: "ai",
-  //         timestamp: new Date(),
-  //         isError: true,
-  //       },
-  //     ]);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleSendWatchlistMessage = async (msg) => {
     setIsLoading(true);
 
@@ -651,29 +571,50 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
 
-        const lines = buffer.split("\n");
+        // Clean spacing and line breaks
+        const cleaned = chunk
+          .replace(/\n{2,}/g, "\n\n")
+          .replace(/\s{2,}/g, " ");
+        fullText += cleaned;
 
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === streamId ? { ...m, partialText: fullText } : m
+          )
+        );
 
-          if (line.startsWith("data:")) {
-            const text = line.replace("data:", "").trim();
-            fullText += text;
-
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === streamId ? { ...m, partialText: fullText } : m
-              )
-            );
-
-            await new Promise((r) => setTimeout(r, 20)); // Optional delay
-          }
-        }
-
-        buffer = ""; // clear the buffer after processing
+        await new Promise((r) => setTimeout(r, 15)); // smooth streaming
       }
+
+      // while (true) {
+      //   const { done, value } = await reader.read();
+      //   if (done) break;
+
+      //   const chunk = decoder.decode(value, { stream: true });
+      //   buffer += chunk;
+
+      //   const lines = buffer.split("\n");
+
+      //   for (let i = 0; i < lines.length; i++) {
+      //     const line = lines[i].trim();
+
+      //     if (line.startsWith("data:")) {
+      //       const text = line.replace("data:", "").trim();
+      //       fullText += text;
+
+      //       setMessages((prev) =>
+      //         prev.map((m) =>
+      //           m.id === streamId ? { ...m, partialText: fullText } : m
+      //         )
+      //       );
+
+      //       await new Promise((r) => setTimeout(r, 20)); // Optional delay
+      //     }
+      //   }
+
+      //   buffer = ""; // clear the buffer after processing
+      // }
 
       // Flush any remaining buffer
       if (buffer.length > 0) {
@@ -1006,7 +947,13 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                       ))}
                     </div>
                   ) : msg.stage === "streaming" ? (
-                    <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+                    // <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+                    //   {msg.partialText || ""}
+                    // </ReactMarkdown>
+                    <ReactMarkdown
+                      className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
+                      linkTarget="_blank"
+                    >
                       {msg.partialText || ""}
                     </ReactMarkdown>
                   ) : msg.stage === "final" ? (
