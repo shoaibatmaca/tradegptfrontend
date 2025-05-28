@@ -555,15 +555,17 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                       ))}
                     </div>
                   ) : msg.stage === "streaming" ? (
-                    // <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+                    // <ReactMarkdown
+                    //   className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
+                    //   linkTarget="_blank"
+                    // >
                     //   {msg.partialText || ""}
                     // </ReactMarkdown>
                     <ReactMarkdown
                       className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
                       linkTarget="_blank"
-                    >
-                      {msg.partialText || ""}
-                    </ReactMarkdown>
+                      children={(msg.partialText || "").replace(/\*\*/g, "")}
+                    />
                   ) : msg.stage === "final" ? (
                     <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
                       {msg.text || ""}
