@@ -245,7 +245,10 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
             //   )
             // );
             // 3
-            const cleaned = cleanAndFormat(text);
+            // const cleaned = cleanAndFormat(text);
+            const cleaned =
+              msg.queryType === "default" ? cleanAndFormat(text) : text;
+
             fullText += cleaned;
 
             setMessages((prev) =>
@@ -279,14 +282,25 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       );
     } catch (err) {
       console.error("Stream Error:", err);
+      // setMessages((prev) => [
+      //   ...prev,
+      //   {
+      //     id: `${baseId}-error`,
+      //     sender: "ai",
+      //     text: "Streaming failed.",
+      //     isError: true,
+      //     timestamp: new Date(),
+      //   },
+      // ]);
       setMessages((prev) => [
         ...prev,
         {
-          id: `${baseId}-error`,
+          id: streamId,
           sender: "ai",
-          text: "Streaming failed.",
-          isError: true,
+          stage: "streaming",
+          partialText: "",
           timestamp: new Date(),
+          queryType: msg.queryType || "default", // Pass queryType
         },
       ]);
     } finally {
