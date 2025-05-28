@@ -134,6 +134,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         stage: "streaming",
         partialText: "",
         timestamp: new Date(),
+        queryType: msg.queryType || "default", // Pass queryType
       },
     ]);
 
@@ -409,7 +410,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           text: aiText,
           sender: "ai",
           timestamp: new Date(),
-          queryType: msg.queryType || "default", // Pass queryType
         },
       ]);
     } finally {
