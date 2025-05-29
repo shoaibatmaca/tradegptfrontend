@@ -574,7 +574,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   useEffect(() => {
     if (token && !sessionId) {
       axios
-        .get(`${BACKEND_URL}/api/chat/start-session/?token=${token}`)
+        .get(`${BACKEND_URL}/api/chat/start/?token=${token}`)
         .then((res) => {
           setSessionId(res.data.session_id);
           setActiveSessionId(res.data.session_id);
