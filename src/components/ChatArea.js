@@ -147,44 +147,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
-      // let fullText = "";
-
-      // while (true) {
-      //   const { done, value } = await reader.read();
-      //   if (done) break;
-      //   const chunk = decoder.decode(value, { stream: true });
-
-      //   // const chunk = decoder.decode(value);
-      //   fullText += chunk;
-
-      //   setMessages((prev) =>
-      //     prev.map((m) =>
-      //       m.id === streamId ? { ...m, partialText: fullText } : m
-      //     )
-      //   );
-      // }
-      // const formatText = (rawText) => {
-      //   return rawText
-      //     .replace(/\*\*/g, "") // Remove **
-      //     .replace(/##+/g, "") // Remove ##
-      //     .replace(/(Trade Idea for .*?)–/gi, "\n### $1 –")
-      //     .replace(/Current Price\s*:/gi, "\n### Current Price:\n")
-      //     .replace(/Trend\s*:/gi, "\n### Trend:\n")
-      //     .replace(/Key Levels\s*:/gi, "\n### Key Levels:\n")
-      //     .replace(/Trade Setup\s*:/gi, "\n### Trade Setup:\n")
-      //     .replace(/Entry\s*:/gi, "\n### Entry:\n")
-      //     .replace(/Stop[-\s]?Loss\s*:/gi, "\n### Stop-Loss:\n")
-      //     .replace(/Target\s*:/gi, "\n### Target:\n")
-      //     .replace(
-      //       /Technical Indicators.*?:/gi,
-      //       "\n### Technical Indicators & Reasoning:\n"
-      //     )
-      //     .replace(/Conclusion\s*:/gi, "\n### Conclusion:\n")
-      //     .replace(/Note\s*:/gi, "\n### Note:\n")
-      //     .replace(/\n{2,}/g, "\n\n")
-      //     .replace(/\s{2,}/g, " ")
-      //     .trim();
-      // };
 
       function cleanAndFormat(text) {
         return text
@@ -236,17 +198,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
-            // fullText += text;
-            // 2
-            // fullText += text;
-            // const formatted = formatText(fullText);
-            // setMessages((prev) =>
-            //   prev.map((m) =>
-            //     m.id === streamId ? { ...m, partialText: formatted } : m
-            //   )
-            // );
-            // 3
-            // const cleaned = cleanAndFormat(text);
             const cleaned =
               msg.queryType === "default" ? cleanAndFormat(text) : text;
 
@@ -478,71 +429,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`flex ${
-                  msg.sender === "user" ? "flex-row-reverse" : ""
-                } max-w-3xl`}
-              >
-                <div
-                  className={`rounded-full w-10 h-10 flex items-center justify-center ${
-                    msg.sender === "user"
-                      ? "bg-hover-bg text-primary-accent ml-3"
-                      : "bg-hover-bg text-blue-400 mr-3"
-                  }`}
-                >
-                  <i
-                    className={`bi ${
-                      msg.sender === "user" ? "bi-person-circle" : "bi-robot"
-                    } text-xl`}
-                  ></i>
-                </div>
-
-                <div
-                  className={`p-4 rounded-lg shadow ${
-                    msg.sender === "user"
-                      ? "bg-primary-accent text-white rounded-tr-none"
-                      : msg.isError
-                      ? "bg-red-900 bg-opacity-30 text-primary-text rounded-tl-none border border-red-400"
-                      : "bg-card-bg text-primary-text rounded-tl-none"
-                  }`}
-                >
-                  {msg.stage === "progress" ? (
-                    <div className="space-y-1 text-sm text-gray-300">
-                      {msg.steps.map((step, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <i
-                            className={`bi ${
-                              step.done
-                                ? "bi-check-circle-fill text-green-400"
-                                : "bi-arrow-repeat animate-spin text-yellow-400"
-                            }`}
-                          ></i>
-                          <span>{step.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : msg.stage === "streaming" ? (
-                    <pre className="whitespace-pre-wrap text-sm font-mono text-white">
-                      {msg.partialText || ""}
-                    </pre>
-                  ) : msg.stage === "final" ? (
-                    <ReactMarkdown className="prose prose-invert max-w-none">
-                      {msg.text || ""}
-                    </ReactMarkdown>
-                  ) : (
-                    <p className="whitespace-pre-line">{msg.text || ""}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))} */}
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -596,12 +482,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                       ))}
                     </div>
                   ) : msg.stage === "streaming" ? (
-                    // <ReactMarkdown
-                    //   className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
-                    //   linkTarget="_blank"
-                    // >
-                    //   {msg.partialText || ""}
-                    // </ReactMarkdown>
                     <ReactMarkdown
                       className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
                       linkTarget="_blank"
