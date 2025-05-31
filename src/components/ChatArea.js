@@ -148,17 +148,50 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
 
+      // function cleanAndFormat(text) {
+      //   return text
+      //     .replace(/\*\*(.*?)\*\*/g, "$1") // remove bold
+      //     .replace(/\*(.*?)\*/g, "$1") // remove italic
+      //     .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // remove code formatting
+      //     .replace(/^#+\s*/gm, "") // remove markdown headers
+      //     .replace(/(?<=[a-z])(?=[A-Z])/g, " ") // space in camelCase
+      //     .replace(/([a-zA-Z]):([A-Za-z])/g, "$1: $2") // space after colons
+      //     .replace(/###\s*/g, "") // remove leading ###
+      //     .replace(/--+/g, "\n\n---\n\n") // format separators
+      //     .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –") // section title
+      //     .replace(/Current Price\s*:\s*/gi, "\n\n**Current Price:** ")
+      //     .replace(/Trend\s*:\s*/gi, "\n\n**Trend:** ")
+      //     .replace(/Key Levels\s*:\s*/gi, "\n\n**Key Levels:** ")
+      //     .replace(/Trade Setup\s*:\s*/gi, "\n\n### Trade Setup:\n")
+      //     .replace(
+      //       /Technical Rationale\s*:\s*/gi,
+      //       "\n\n### Technical Rationale:\n"
+      //     )
+      //     .replace(/Execution Plan\s*:\s*/gi, "\n\n### Execution Plan:\n")
+      //     .replace(
+      //       /Risk[-\s]Reward\s*Ratio\s*:\s*/gi,
+      //       "\n\n**Risk-Reward Ratio:** "
+      //     )
+      //     .replace(/Target\s*:\s*/gi, "\n\n**Target:** ")
+      //     .replace(/Stop[-\s]?Loss\s*:\s*/gi, "\n\n**Stop-Loss:** ")
+      //     .replace(/Entry\s*:\s*/gi, "\n\n**Entry:** ")
+      //     .replace(/Note\s*:\s*/gi, "\n\n**Note:** ")
+      //     .replace(/\n{2,}/g, "\n\n") // normalize spacing
+      //     .replace(/\s{2,}/g, " ") // reduce excessive spaces
+      //     .trim();
+      // }
+
       function cleanAndFormat(text) {
         return text
+          .replace(/^markdown[#>]*\s*/i, "") // Remove raw markdown prefix
+          .replace(/(?<!\n)(#+\s*)/g, "\n\n$1") // Add newlines before headings
           .replace(/\*\*(.*?)\*\*/g, "$1") // remove bold
           .replace(/\*(.*?)\*/g, "$1") // remove italic
           .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // remove code formatting
-          .replace(/^#+\s*/gm, "") // remove markdown headers
-          .replace(/(?<=[a-z])(?=[A-Z])/g, " ") // space in camelCase
-          .replace(/([a-zA-Z]):([A-Za-z])/g, "$1: $2") // space after colons
-          .replace(/###\s*/g, "") // remove leading ###
+          .replace(/^#+\s*/gm, "") // remove markdown header hashes if needed
+          .replace(/###\s*/g, "\n\n### ") // ensure heading and spacing
           .replace(/--+/g, "\n\n---\n\n") // format separators
-          .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –") // section title
+          .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –")
           .replace(/Current Price\s*:\s*/gi, "\n\n**Current Price:** ")
           .replace(/Trend\s*:\s*/gi, "\n\n**Trend:** ")
           .replace(/Key Levels\s*:\s*/gi, "\n\n**Key Levels:** ")
