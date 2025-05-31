@@ -297,19 +297,79 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
   const callOpenRouterAPI = async (messageText) => {
     setApiError(null);
+
+    const streamId = `${Date.now()}-directstream`;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: streamId,
+        sender: "ai",
+        stage: "streaming",
+        partialText: "",
+        timestamp: new Date(),
+        queryType: "direct",
+      },
+    ]);
+
     try {
-      const prompt = `SYSTEM: You are TradeGPT, an expert in finance and trading.\n\nUSER: ${messageText}\n\nASSISTANT:`;
-      const response = await axios.post(`${BACKEND_URL}/api/deepseek-chat`, {
-        inputs: {
-          prompt: prompt,
-        },
-        stream: false,
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: messageText }),
       });
-      return response.data.message || response.data.content || "No response.";
-    } catch (error) {
-      console.error("Ollama Proxy Error:", error);
-      setApiError("AI service is currently unavailable");
-      return "AI service is currently unavailable.";
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let fullText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        const lines = buffer.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+
+          if (line.startsWith("data:")) {
+            const text = line.replace("data:", "").trim();
+            const cleaned = cleanAndFormat(text);
+            fullText += cleaned;
+
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === streamId ? { ...m, partialText: fullText } : m
+              )
+            );
+          }
+        }
+
+        buffer = ""; // clear buffer
+      }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+        )
+      );
+    } catch (err) {
+      console.error("Direct chat stream error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `${streamId}-error`,
+          sender: "ai",
+          text: "Streaming failed.",
+          isError: true,
+          timestamp: new Date(),
+        },
+      ]);
     }
   };
 
@@ -364,6 +424,41 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
+  // const handleSendMessage = async (e) => {
+  //   e.preventDefault();
+  //   if (!inputMessage.trim()) return;
+
+  //   const userMsg = {
+  //     id: messages.length + 1,
+  //     text: inputMessage,
+  //     sender: "user",
+  //     timestamp: new Date(),
+  //   };
+
+  //   setMessages((prev) => [...prev, userMsg]);
+  //   setInputMessage("");
+  //   setIsLoading(true);
+
+  //   try {
+  //     const isStockQuery = inputMessage.toLowerCase().startsWith("stock for ");
+  //     const aiText = isStockQuery
+  //       ? await callFinhubAndAnalyzeWithOpenRouter(inputMessage)
+  //       : await callOpenRouterAPI(inputMessage);
+
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         id: prev.length + 1,
+  //         text: aiText,
+  //         sender: "ai",
+  //         timestamp: new Date(),
+  //       },
+  //     ]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -379,18 +474,78 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setInputMessage("");
     setIsLoading(true);
 
-    try {
-      const isStockQuery = inputMessage.toLowerCase().startsWith("stock for ");
-      const aiText = isStockQuery
-        ? await callFinhubAndAnalyzeWithOpenRouter(inputMessage)
-        : await callOpenRouterAPI(inputMessage);
+    const streamId = `${Date.now()}-directstream`;
 
+    // Placeholder for streaming response
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: streamId,
+        sender: "ai",
+        stage: "streaming",
+        partialText: "",
+        timestamp: new Date(),
+        queryType: "direct",
+      },
+    ]);
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: inputMessage }),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let fullText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        const lines = buffer.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+
+          if (line.startsWith("data:")) {
+            const text = line.replace("data:", "").trim();
+            const cleaned = cleanAndFormat(text); // ← same formatter used in watchlist
+
+            fullText += cleaned;
+
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === streamId ? { ...m, partialText: fullText } : m
+              )
+            );
+          }
+        }
+
+        buffer = ""; // reset after each chunk
+      }
+
+      // Final AI message
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+        )
+      );
+    } catch (err) {
+      console.error("Stream error:", err);
       setMessages((prev) => [
         ...prev,
         {
-          id: prev.length + 1,
-          text: aiText,
+          id: `${streamId}-error`,
           sender: "ai",
+          text: "Streaming failed.",
+          isError: true,
           timestamp: new Date(),
         },
       ]);
@@ -398,6 +553,35 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       setIsLoading(false);
     }
   };
+
+  // const handlePromptCardClick = async (prompt) => {
+  //   if (isLoading) return;
+
+  //   const userMsg = {
+  //     id: messages.length + 1,
+  //     text: prompt,
+  //     sender: "user",
+  //     timestamp: new Date(),
+  //   };
+
+  //   setMessages((prev) => [...prev, userMsg]);
+  //   setIsLoading(true);
+
+  //   try {
+  //     const aiText = await callOpenRouterAPI(prompt);
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       {
+  //         id: prev.length + 1,
+  //         text: aiText,
+  //         sender: "ai",
+  //         timestamp: new Date(),
+  //       },
+  //     ]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handlePromptCardClick = async (prompt) => {
     if (isLoading) return;
@@ -412,14 +596,76 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
+    const streamId = `${Date.now()}-promptstream`;
+
+    // Placeholder for AI stream
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: streamId,
+        sender: "ai",
+        stage: "streaming",
+        partialText: "",
+        timestamp: new Date(),
+        queryType: "direct",
+      },
+    ]);
+
     try {
-      const aiText = await callOpenRouterAPI(prompt);
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt }),
+      });
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let fullText = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+
+        const lines = buffer.split("\n");
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line.startsWith("data:")) {
+            const text = line.replace("data:", "").trim();
+            const cleaned = cleanAndFormat(text);
+
+            fullText += cleaned;
+
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === streamId ? { ...m, partialText: fullText } : m
+              )
+            );
+          }
+        }
+
+        buffer = "";
+      }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+        )
+      );
+    } catch (err) {
+      console.error("Streaming error:", err);
       setMessages((prev) => [
         ...prev,
         {
-          id: prev.length + 1,
-          text: aiText,
+          id: `${streamId}-error`,
           sender: "ai",
+          text: "Streaming failed.",
+          isError: true,
           timestamp: new Date(),
         },
       ]);
