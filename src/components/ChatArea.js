@@ -17,6 +17,33 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const token = new URLSearchParams(window.location.search).get("token");
 
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
+  function cleanAndFormat(text) {
+    return text
+      .replace(/^markdown[#>]*\s*/i, "") // Remove markdown# prefix
+      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") // Ensure newlines before headers
+      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize headers to ### and space
+      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
+      .replace(/\*(.*?)\*/g, "$1") // Remove italic
+      .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Remove inline code
+      .replace(/\|.*?\|/g, "") // Remove table rows
+      .replace(/-{3,}/g, "\n\n---\n\n") // Section separators
+      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") // Ensure spacing after colons
+      .replace(/###\s*#\s*/g, "### ") // Clean up things like ### #Title
+      .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
+      .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
+      .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
+      .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
+      .replace(/AnalystInsights/gi, "Analyst Insights")
+      .replace(/UpcomingEvents/gi, "Upcoming Events")
+      .replace(/TechnicalIndicators/gi, "Technical Indicators")
+      .replace(/Competitors/gi, "Competitors")
+      .replace(/Note\s*:/gi, "\n\n**Note:** ")
+      .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
+      .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
+      .replace(/\n{2,}/g, "\n\n") // Clean excessive newlines
+      .replace(/\s{2,}/g, " ") // Clean excessive spaces
+      .trim();
+  }
 
   const promptCards = [
     {
@@ -180,37 +207,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       //     .replace(/\s{2,}/g, " ") // reduce excessive spaces
       //     .trim();
       // }
-
-      function cleanAndFormat(text) {
-        return text
-          .replace(/^markdown[#>]*\s*/i, "") // Remove markdown# prefix
-          .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") // Ensure newlines before headers
-          .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize headers to ### and space
-          .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
-          .replace(/\*(.*?)\*/g, "$1") // Remove italic
-          .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Remove inline code
-          .replace(/\|.*?\|/g, "") // Remove table rows
-          .replace(/-{3,}/g, "\n\n---\n\n") // Section separators
-          .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") // Ensure spacing after colons
-          .replace(/###\s*#\s*/g, "### ") // Clean up things like ### #Title
-          .replace(
-            /KeyFinancialMetrics\s*\(TTM\)/gi,
-            "### Key Financial Metrics"
-          )
-          .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
-          .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
-          .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
-          .replace(/AnalystInsights/gi, "Analyst Insights")
-          .replace(/UpcomingEvents/gi, "Upcoming Events")
-          .replace(/TechnicalIndicators/gi, "Technical Indicators")
-          .replace(/Competitors/gi, "Competitors")
-          .replace(/Note\s*:/gi, "\n\n**Note:** ")
-          .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
-          .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
-          .replace(/\n{2,}/g, "\n\n") // Clean excessive newlines
-          .replace(/\s{2,}/g, " ") // Clean excessive spaces
-          .trim();
-      }
 
       let fullText = "";
       let buffer = "";
