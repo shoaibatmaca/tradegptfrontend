@@ -183,34 +183,21 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       function cleanAndFormat(text) {
         return text
-          .replace(/^markdown[#>]*\s*/i, "") // Remove raw markdown prefix
-          .replace(/(?<!\n)(#+\s*)/g, "\n\n$1") // Add newlines before headings
-          .replace(/\*\*(.*?)\*\*/g, "$1") // remove bold
-          .replace(/\*(.*?)\*/g, "$1") // remove italic
-          .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // remove code formatting
-          .replace(/^#+\s*/gm, "") // remove markdown header hashes if needed
-          .replace(/###\s*/g, "\n\n### ") // ensure heading and spacing
-          .replace(/--+/g, "\n\n---\n\n") // format separators
-          .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –")
-          .replace(/Current Price\s*:\s*/gi, "\n\n**Current Price:** ")
-          .replace(/Trend\s*:\s*/gi, "\n\n**Trend:** ")
-          .replace(/Key Levels\s*:\s*/gi, "\n\n**Key Levels:** ")
-          .replace(/Trade Setup\s*:\s*/gi, "\n\n### Trade Setup:\n")
+          .replace(/^markdown[#>]*\s*/i, "") // Remove starting markdown# or markdown> etc.
+          .replace(/(?<!\n)(#{2,6})(?=\s*\w)/g, "\n\n$1") // Add line breaks before headings
+          .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize heading levels to ### and add spacing
+          .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
+          .replace(/\*(.*?)\*/g, "$1") // Remove italic
+          .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Remove inline code
+          .replace(/\|.*?\|/g, "") // Remove markdown tables
+          .replace(/-{3,}/g, "\n\n---\n\n") // Format long separators
+          .replace(/([A-Za-z])(:)([A-Za-z])/g, "$1: $3") // Fix spacing around colons
           .replace(
-            /Technical Rationale\s*:\s*/gi,
-            "\n\n### Technical Rationale:\n"
+            /(Entry Price|Stop-Loss|Target Price|Risk-Reward Ratio|Note)\s*[:：]/gi,
+            "\n\n**$1:** "
           )
-          .replace(/Execution Plan\s*:\s*/gi, "\n\n### Execution Plan:\n")
-          .replace(
-            /Risk[-\s]Reward\s*Ratio\s*:\s*/gi,
-            "\n\n**Risk-Reward Ratio:** "
-          )
-          .replace(/Target\s*:\s*/gi, "\n\n**Target:** ")
-          .replace(/Stop[-\s]?Loss\s*:\s*/gi, "\n\n**Stop-Loss:** ")
-          .replace(/Entry\s*:\s*/gi, "\n\n**Entry:** ")
-          .replace(/Note\s*:\s*/gi, "\n\n**Note:** ")
-          .replace(/\n{2,}/g, "\n\n") // normalize spacing
-          .replace(/\s{2,}/g, " ") // reduce excessive spaces
+          .replace(/(\n){2,}/g, "\n\n") // Normalize multiple newlines
+          .replace(/\s{2,}/g, " ") // Collapse double spaces
           .trim();
       }
 
