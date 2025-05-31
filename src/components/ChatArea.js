@@ -183,21 +183,32 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       function cleanAndFormat(text) {
         return text
-          .replace(/^markdown[#>]*\s*/i, "") // Remove starting markdown# or markdown> etc.
-          .replace(/(?<!\n)(#{2,6})(?=\s*\w)/g, "\n\n$1") // Add line breaks before headings
-          .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize heading levels to ### and add spacing
+          .replace(/^markdown[#>]*\s*/i, "") // Remove markdown# prefix
+          .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") // Ensure newlines before headers
+          .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize headers to ### and space
           .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
           .replace(/\*(.*?)\*/g, "$1") // Remove italic
           .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Remove inline code
-          .replace(/\|.*?\|/g, "") // Remove markdown tables
-          .replace(/-{3,}/g, "\n\n---\n\n") // Format long separators
-          .replace(/([A-Za-z])(:)([A-Za-z])/g, "$1: $3") // Fix spacing around colons
+          .replace(/\|.*?\|/g, "") // Remove table rows
+          .replace(/-{3,}/g, "\n\n---\n\n") // Section separators
+          .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") // Ensure spacing after colons
+          .replace(/###\s*#\s*/g, "### ") // Clean up things like ### #Title
           .replace(
-            /(Entry Price|Stop-Loss|Target Price|Risk-Reward Ratio|Note)\s*[:：]/gi,
-            "\n\n**$1:** "
+            /KeyFinancialMetrics\s*\(TTM\)/gi,
+            "### Key Financial Metrics"
           )
-          .replace(/(\n){2,}/g, "\n\n") // Normalize multiple newlines
-          .replace(/\s{2,}/g, " ") // Collapse double spaces
+          .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
+          .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
+          .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
+          .replace(/AnalystInsights/gi, "Analyst Insights")
+          .replace(/UpcomingEvents/gi, "Upcoming Events")
+          .replace(/TechnicalIndicators/gi, "Technical Indicators")
+          .replace(/Competitors/gi, "Competitors")
+          .replace(/Note\s*:/gi, "\n\n**Note:** ")
+          .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
+          .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
+          .replace(/\n{2,}/g, "\n\n") // Clean excessive newlines
+          .replace(/\s{2,}/g, " ") // Clean excessive spaces
           .trim();
       }
 
