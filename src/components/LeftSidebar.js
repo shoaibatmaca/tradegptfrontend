@@ -1,7 +1,6 @@
 // import { useEffect, useState } from "react";
 // import UserProfileModal from "./UserProfileModal";
 
-
 // // import jwt_decode from "jwt-decode";
 // import { jwtDecode } from "jwt-decode";
 
@@ -17,7 +16,6 @@
 
 //   // prompt model
 //   const [showModal, setShowModal] = useState(false);
-
 
 //   const handleUserClick = () => {
 //     const token = new URLSearchParams(window.location.search).get("token");
@@ -230,15 +228,18 @@
 
 // export default LeftSidebar;
 
-
-
 import { useEffect, useState } from "react";
 import UserProfileModal from "./UserProfileModal";
 
 // import jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
 
-const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }) => {
+const LeftSidebar = ({
+  collapsed,
+  toggleSidebar,
+  onNavItemClick,
+  activeSection,
+}) => {
   // REMOVE: Local activeItem state کیونکہ اب parent سے props آ رہا ہے
   // const [activeItem, setActiveItem] = useState("dashboard");
 
@@ -266,7 +267,7 @@ const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }
       setShowProfileModal(true);
     }
   };
-  
+
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
@@ -360,7 +361,7 @@ const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }
           </li>
         </ul>
 
-        <div className="text-xs font-semibold text-secondary-text uppercase p-1">
+        {/* <div className="text-xs font-semibold text-secondary-text uppercase p-1">
           {!collapsed && <span>Investment</span>}
         </div>
 
@@ -383,7 +384,7 @@ const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }
             <i className="bi bi-pie-chart-fill mr-3"></i>
             {!collapsed && <span>Investment Insights and Analysis</span>}
           </li>
-        </ul>
+        </ul> */}
 
         <div className="p-4 mt-4">
           {!collapsed && (
