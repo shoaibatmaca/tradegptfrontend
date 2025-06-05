@@ -10,6 +10,10 @@ const App = () => {
   const [watchlistVisible, setWatchlistVisible] = useState(false);
   const [watchlistMessage, setWatchlistMessage] = useState(null);
 
+  // ADD: Prompts functionality state
+  const [showPrompts, setShowPrompts] = useState(false);
+  const [activeSection, setActiveSection] = useState('dashboard');
+
   // Debug toggle function with console logs
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -28,6 +32,23 @@ const App = () => {
     setWatchlistMessage(message);
   };
 
+  // ADD: Handle navigation item clicks from sidebar
+  const handleNavItemClick = (item) => {
+    setActiveSection(item);
+    if (item === 'prompts') {
+      setShowPrompts(true);
+    } else {
+      setShowPrompts(false);
+    }
+    console.log("Navigation clicked:", item);
+  };
+
+  // ADD: Handle closing prompts
+  const handleClosePrompts = () => {
+    setShowPrompts(false);
+    setActiveSection('dashboard');
+  };
+
   // Reset watchlist message after it's been processed
   useEffect(() => {
     if (watchlistMessage) {
@@ -44,14 +65,27 @@ const App = () => {
     console.log("Watchlist visibility changed to:", watchlistVisible);
   }, [watchlistVisible]);
 
+  // ADD: Log prompts state changes
+  useEffect(() => {
+    console.log("Prompts visibility changed to:", showPrompts);
+  }, [showPrompts]);
+
   return (
     <div className="flex w-full min-h-screen bg-primary-bg">
-      <LeftSidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
+      <LeftSidebar 
+        collapsed={sidebarCollapsed} 
+        toggleSidebar={toggleSidebar} 
+        onNavItemClick={handleNavItemClick}
+        activeSection={activeSection}
+      />
       
       <div className={`flex-1 flex flex-col ${sidebarCollapsed ? 'ml-16' : 'ml-72'} transition-all duration-300`}>
         <ChatArea 
           toggleWatchlist={toggleWatchlist} 
-          watchlistMessage={watchlistMessage} 
+          watchlistMessage={watchlistMessage}
+          showPrompts={showPrompts}
+          onClosePrompts={handleClosePrompts}
+          activeSection={activeSection}
         />
       </div>
       
@@ -65,7 +99,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-

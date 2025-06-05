@@ -1,11 +1,19 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-
 import PromptCard from "./PromptCard";
+import TradingPromptsInline from "./TradingPromptsInline";
 
 const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
-const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
+
+// ADD: Update props to include prompts functionality
+const ChatArea = ({ 
+  toggleWatchlist, 
+  watchlistMessage, 
+  showPrompts, 
+  onClosePrompts, 
+  activeSection 
+}) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -16,19 +24,21 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
   const [activeSessionId, setActiveSessionId] = useState(null);
   const token = new URLSearchParams(window.location.search).get("token");
 
+  // ... (all your existing functions remain the same: cleanAndFormat, scrollToBottom, etc.)
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
+  
   function cleanAndFormat(text) {
     return text
-      .replace(/^markdown[#>]*\s*/i, "") // Remove markdown# prefix
-      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") // Ensure newlines before headers
-      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") // Normalize headers to ### and space
-      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove bold
-      .replace(/\*(.*?)\*/g, "$1") // Remove italic
-      .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // Remove inline code
-      .replace(/\|.*?\|/g, "") // Remove table rows
-      .replace(/-{3,}/g, "\n\n---\n\n") // Section separators
-      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") // Ensure spacing after colons
-      .replace(/###\s*#\s*/g, "### ") // Clean up things like ### #Title
+      .replace(/^markdown[#>]*\s*/i, "") 
+      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") 
+      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") 
+      .replace(/\*\*(.*?)\*\*/g, "$1") 
+      .replace(/\*(.*?)\*/g, "$1") 
+      .replace(/`{1,3}(.*?)`{1,3}/g, "$1") 
+      .replace(/\|.*?\|/g, "") 
+      .replace(/-{3,}/g, "\n\n---\n\n") 
+      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") 
+      .replace(/###\s*#\s*/g, "### ") 
       .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
       .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
       .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
@@ -40,8 +50,8 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       .replace(/Note\s*:/gi, "\n\n**Note:** ")
       .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
       .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
-      .replace(/\n{2,}/g, "\n\n") // Clean excessive newlines
-      .replace(/\s{2,}/g, " ") // Clean excessive spaces
+      .replace(/\n{2,}/g, "\n\n") 
+      .replace(/\s{2,}/g, " ") 
       .trim();
   }
 
@@ -72,6 +82,20 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     },
   ];
 
+  // ADD: Handle using prompts from TradingPromptsInline
+  const handleUsePrompt = (promptText) => {
+    setInputMessage(promptText);
+    if (onClosePrompts) {
+      onClosePrompts(); // Close prompts and go back to chat
+    }
+    // Automatically send the message
+    setTimeout(() => {
+      const event = { preventDefault: () => {} };
+      handleSendMessage(event);
+    }, 100);
+  };
+
+  // ... (all your existing useEffect and functions remain exactly the same)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -114,7 +138,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       "Consolidating and analyzing information...",
     ];
 
-    // Step 1: Show initial steps
     setMessages((prev) => [
       ...prev,
       {
@@ -141,18 +164,15 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
       );
     };
 
-    // Animate steps 0–2
     for (let i = 0; i < 3; i++) {
       await new Promise((r) => setTimeout(r, 1200));
       updateStep(i);
     }
 
-    // Step 3: Show final step and prepare to stream
     updateStep(3);
 
     const streamId = `${baseId}-stream`;
 
-    // Add initial streaming block
     setMessages((prev) => [
       ...prev,
       {
@@ -161,7 +181,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         stage: "streaming",
         partialText: "",
         timestamp: new Date(),
-        queryType: msg.queryType || "default", // Pass queryType
+        queryType: msg.queryType || "default",
       },
     ]);
 
@@ -174,39 +194,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
-
-      // function cleanAndFormat(text) {
-      //   return text
-      //     .replace(/\*\*(.*?)\*\*/g, "$1") // remove bold
-      //     .replace(/\*(.*?)\*/g, "$1") // remove italic
-      //     .replace(/`{1,3}(.*?)`{1,3}/g, "$1") // remove code formatting
-      //     .replace(/^#+\s*/gm, "") // remove markdown headers
-      //     .replace(/(?<=[a-z])(?=[A-Z])/g, " ") // space in camelCase
-      //     .replace(/([a-zA-Z]):([A-Za-z])/g, "$1: $2") // space after colons
-      //     .replace(/###\s*/g, "") // remove leading ###
-      //     .replace(/--+/g, "\n\n---\n\n") // format separators
-      //     .replace(/(Trade Idea.*?)–/gi, "\n\n### $1 –") // section title
-      //     .replace(/Current Price\s*:\s*/gi, "\n\n**Current Price:** ")
-      //     .replace(/Trend\s*:\s*/gi, "\n\n**Trend:** ")
-      //     .replace(/Key Levels\s*:\s*/gi, "\n\n**Key Levels:** ")
-      //     .replace(/Trade Setup\s*:\s*/gi, "\n\n### Trade Setup:\n")
-      //     .replace(
-      //       /Technical Rationale\s*:\s*/gi,
-      //       "\n\n### Technical Rationale:\n"
-      //     )
-      //     .replace(/Execution Plan\s*:\s*/gi, "\n\n### Execution Plan:\n")
-      //     .replace(
-      //       /Risk[-\s]Reward\s*Ratio\s*:\s*/gi,
-      //       "\n\n**Risk-Reward Ratio:** "
-      //     )
-      //     .replace(/Target\s*:\s*/gi, "\n\n**Target:** ")
-      //     .replace(/Stop[-\s]?Loss\s*:\s*/gi, "\n\n**Stop-Loss:** ")
-      //     .replace(/Entry\s*:\s*/gi, "\n\n**Entry:** ")
-      //     .replace(/Note\s*:\s*/gi, "\n\n**Note:** ")
-      //     .replace(/\n{2,}/g, "\n\n") // normalize spacing
-      //     .replace(/\s{2,}/g, " ") // reduce excessive spaces
-      //     .trim();
-      // }
 
       let fullText = "";
       let buffer = "";
@@ -236,14 +223,13 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
               )
             );
 
-            await new Promise((r) => setTimeout(r, 20)); // Optional delay
+            await new Promise((r) => setTimeout(r, 20));
           }
         }
 
-        buffer = ""; // clear the buffer after processing
+        buffer = "";
       }
 
-      // Flush any remaining buffer
       if (buffer.length > 0) {
         fullText += buffer;
         setMessages((prev) =>
@@ -253,7 +239,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         );
       }
 
-      // Final stage
       setMessages((prev) =>
         prev.map((m) =>
           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
@@ -346,7 +331,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           }
         }
 
-        buffer = ""; // clear buffer
+        buffer = "";
       }
 
       setMessages((prev) =>
@@ -375,7 +360,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     if (!symbol) return "Invalid stock symbol.";
 
     try {
-      // Fetch from Alpha Vantage
       const quoteRes = await axios.get(
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=04RGF1U9PAJ49VYI`
       );
@@ -397,7 +381,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         100
       ).toFixed(2)}%).`;
 
-      // Call DeepSeek V3
       const aiRes = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, {
         model: "deepseek-chat",
         messages: [
@@ -420,41 +403,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
-  // const handleSendMessage = async (e) => {
-  //   e.preventDefault();
-  //   if (!inputMessage.trim()) return;
-
-  //   const userMsg = {
-  //     id: messages.length + 1,
-  //     text: inputMessage,
-  //     sender: "user",
-  //     timestamp: new Date(),
-  //   };
-
-  //   setMessages((prev) => [...prev, userMsg]);
-  //   setInputMessage("");
-  //   setIsLoading(true);
-
-  //   try {
-  //     const isStockQuery = inputMessage.toLowerCase().startsWith("stock for ");
-  //     const aiText = isStockQuery
-  //       ? await callFinhubAndAnalyzeWithOpenRouter(inputMessage)
-  //       : await callOpenRouterAPI(inputMessage);
-
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       {
-  //         id: prev.length + 1,
-  //         text: aiText,
-  //         sender: "ai",
-  //         timestamp: new Date(),
-  //       },
-  //     ]);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -472,7 +420,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
     const streamId = `${Date.now()}-directstream`;
 
-    // Placeholder for streaming response
     setMessages((prev) => [
       ...prev,
       {
@@ -512,7 +459,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
-            const cleaned = cleanAndFormat(text); // ← same formatter used in watchlist
+            const cleaned = cleanAndFormat(text);
 
             fullText += cleaned;
 
@@ -524,10 +471,9 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           }
         }
 
-        buffer = ""; // reset after each chunk
+        buffer = "";
       }
 
-      // Final AI message
       setMessages((prev) =>
         prev.map((m) =>
           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
@@ -550,35 +496,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
     }
   };
 
-  // const handlePromptCardClick = async (prompt) => {
-  //   if (isLoading) return;
-
-  //   const userMsg = {
-  //     id: messages.length + 1,
-  //     text: prompt,
-  //     sender: "user",
-  //     timestamp: new Date(),
-  //   };
-
-  //   setMessages((prev) => [...prev, userMsg]);
-  //   setIsLoading(true);
-
-  //   try {
-  //     const aiText = await callOpenRouterAPI(prompt);
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       {
-  //         id: prev.length + 1,
-  //         text: aiText,
-  //         sender: "ai",
-  //         timestamp: new Date(),
-  //       },
-  //     ]);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const handlePromptCardClick = async (prompt) => {
     if (isLoading) return;
 
@@ -594,7 +511,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 
     const streamId = `${Date.now()}-promptstream`;
 
-    // Placeholder for AI stream
     setMessages((prev) => [
       ...prev,
       {
@@ -685,7 +601,17 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
         </div>
       )}
 
-      {messages.length === 0 ? (
+      {/* UPDATE: Conditional rendering for prompts vs default vs messages */}
+      {showPrompts ? (
+        // Show Trading Prompts Interface
+        <div className="flex-1 overflow-y-auto p-6">
+          <TradingPromptsInline 
+            isVisible={showPrompts}
+            onUsePrompt={handleUsePrompt}
+          />
+        </div>
+      ) : messages.length === 0 ? (
+        // Show Default Prompt Cards
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
             {promptCards.map((card) => (
@@ -701,6 +627,7 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
           </div>
         </div>
       ) : (
+        // Show Chat Messages
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((msg) => (
             <div
@@ -714,7 +641,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                   msg.sender === "user" ? "flex-row-reverse" : ""
                 } w-full max-w-4xl`}
               >
-                {/* Avatar */}
                 <div
                   className={`rounded-full w-10 h-10 flex items-center justify-center ${
                     msg.sender === "user"
@@ -729,7 +655,6 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
                   ></i>
                 </div>
 
-                {/* Message Bubble */}
                 <div
                   className={`p-4 rounded-lg shadow whitespace-pre-wrap break-words w-full ${
                     msg.sender === "user"
@@ -810,239 +735,3 @@ const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
 };
 
 export default ChatArea;
-
-// import axios from "axios";
-// import { useEffect, useRef, useState } from "react";
-// import ReactMarkdown from "react-markdown";
-
-// const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
-
-// const ChatArea = ({ toggleWatchlist, watchlistMessage }) => {
-//   const [messages, setMessages] = useState([]);
-//   const [inputMessage, setInputMessage] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [apiError, setApiError] = useState(null);
-//   const [sessionId, setSessionId] = useState(null);
-//   const [chatSessions, setChatSessions] = useState([]);
-//   const [activeSessionId, setActiveSessionId] = useState(null);
-
-//   const messagesEndRef = useRef(null);
-//   const token = new URLSearchParams(window.location.search).get("token");
-
-//   useEffect(() => {
-//     scrollToBottom();
-//   }, [messages]);
-
-//   // Load user chat sessions
-//   useEffect(() => {
-//     if (token) {
-//       axios
-//         .get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
-//         .then((res) => setChatSessions(res.data))
-//         .catch((err) => console.error("Session fetch error:", err));
-//     }
-//   }, [token]);
-
-//   // Start session
-//   useEffect(() => {
-//     if (token && !sessionId) {
-//       axios
-//         .get(`${BACKEND_URL}/api/chat/start/?token=${token}`)
-//         .then((res) => {
-//           setSessionId(res.data.session_id);
-//           setActiveSessionId(res.data.session_id);
-//         })
-//         .catch((err) => console.error("Session start failed:", err));
-//     }
-//   }, [token]);
-
-//   const scrollToBottom = () => {
-//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//   };
-
-//   const saveMessage = async (role, content) => {
-//     if (!sessionId) return;
-//     await axios.post(
-//       `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
-//       { role, content }
-//     );
-//   };
-
-//   const loadSession = async (id) => {
-//     setActiveSessionId(id);
-//     setSessionId(id);
-//     try {
-//       const res = await axios.get(
-//         `${BACKEND_URL}/api/chat/sessions/${id}/messages/?token=${token}`
-//       );
-//       setMessages(
-//         res.data.map((msg, i) => ({
-//           id: i,
-//           sender: msg.role,
-//           text: msg.content,
-//           timestamp: msg.timestamp,
-//         }))
-//       );
-//     } catch (err) {
-//       setApiError("Failed to load chat.");
-//     }
-//   };
-
-//   const handleSendMessage = async (e) => {
-//     e.preventDefault();
-//     if (!inputMessage.trim()) return;
-
-//     const userMsg = {
-//       id: Date.now(),
-//       text: inputMessage,
-//       sender: "user",
-//       timestamp: new Date(),
-//     };
-
-//     setMessages((prev) => [...prev, userMsg]);
-//     await saveMessage("user", inputMessage);
-
-//     setInputMessage("");
-//     setIsLoading(true);
-
-//     try {
-//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/stream`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           queryType: "default",
-//           name: "N/A",
-//           symbol: "N/A",
-//         }),
-//       });
-
-//       const reader = res.body.getReader();
-//       const decoder = new TextDecoder("utf-8");
-
-//       let fullText = "";
-//       const streamId = Date.now();
-
-//       setMessages((prev) => [
-//         ...prev,
-//         { id: streamId, sender: "ai", partialText: "", stage: "streaming" },
-//       ]);
-
-//       while (true) {
-//         const { done, value } = await reader.read();
-//         if (done) break;
-//         const chunk = decoder.decode(value);
-//         const lines = chunk.split("\n");
-
-//         lines.forEach((line) => {
-//           if (line.startsWith("data:")) {
-//             const text = line.replace("data:", "").trim();
-//             fullText += text;
-
-//             setMessages((prev) =>
-//               prev.map((m) =>
-//                 m.id === streamId ? { ...m, partialText: fullText } : m
-//               )
-//             );
-//           }
-//         });
-//       }
-
-//       setMessages((prev) =>
-//         prev.map((m) =>
-//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-//         )
-//       );
-
-//       await saveMessage("ai", fullText);
-//     } catch (err) {
-//       console.error("Stream error:", err);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   const handleInputChange = (e) => setInputMessage(e.target.value);
-
-//   return (
-//     <div className="flex flex-col h-screen bg-[#161921]">
-//       <div className="flex justify-between items-center p-4 border-b border-gray-700">
-//         <h1 className="text-xl text-white font-bold">TradeGPT</h1>
-//         <div>
-//           <button
-//             onClick={toggleWatchlist}
-//             className="text-sm text-gray-400 hover:text-white"
-//           >
-//             Watchlist
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Session History */}
-//       <div className="overflow-x-auto whitespace-nowrap text-sm text-gray-300 border-b border-gray-700 p-2">
-//         {chatSessions.map((s) => (
-//           <button
-//             key={s.session_id}
-//             onClick={() => loadSession(s.session_id)}
-//             className={`mr-2 px-3 py-1 rounded ${
-//               activeSessionId === s.session_id
-//                 ? "bg-blue-700 text-white"
-//                 : "bg-gray-800"
-//             }`}
-//           >
-//             {new Date(s.created_at).toLocaleString()}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* Chat Messages */}
-//       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-//         {messages.map((msg) => (
-//           <div
-//             key={msg.id}
-//             className={`flex ${
-//               msg.sender === "user" ? "justify-end" : "justify-start"
-//             }`}
-//           >
-//             <div
-//               className={`p-4 rounded-lg max-w-xl text-sm ${
-//                 msg.sender === "user"
-//                   ? "bg-blue-600 text-white"
-//                   : "bg-gray-700 text-white"
-//               }`}
-//             >
-//               {msg.stage === "streaming" ? (
-//                 <ReactMarkdown>{msg.partialText}</ReactMarkdown>
-//               ) : (
-//                 <ReactMarkdown>{msg.text}</ReactMarkdown>
-//               )}
-//             </div>
-//           </div>
-//         ))}
-//         <div ref={messagesEndRef} />
-//       </div>
-
-//       {/* Input Area */}
-//       <div className="p-4 border-t border-gray-700">
-//         <form onSubmit={handleSendMessage} className="relative">
-//           <input
-//             type="text"
-//             placeholder="Type your message..."
-//             value={inputMessage}
-//             onChange={handleInputChange}
-//             className="w-full p-3 rounded-full bg-gray-800 text-white pr-12"
-//             disabled={isLoading}
-//           />
-//           <button
-//             type="submit"
-//             disabled={!inputMessage.trim() || isLoading}
-//             className="absolute right-4 top-2 text-white"
-//           >
-//             <i className="bi bi-send-fill"></i>
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ChatArea;
