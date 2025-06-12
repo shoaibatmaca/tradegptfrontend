@@ -612,7 +612,7 @@ const ChatArea = ({
         </div>
       ) : messages.length === 0 ? (
         // Show Default Prompt Cards
-        <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="flex-1 p-6 flex items-center justify-center chat-area-part">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
             {promptCards.map((card) => (
               <div key={card.id}>
@@ -703,7 +703,7 @@ const ChatArea = ({
         </div>
       )}
 
-      <div className="p-6 border-t border-gray-700">
+      <div className="p-6 border-t border-gray-700" style={{backgroundColor: '#1e1e1e'}}>
         <form onSubmit={handleSendMessage} className="relative">
           <input
             type="text"

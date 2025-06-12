@@ -40,10 +40,33 @@ body {
   background-color: #161b25;
   border: 1px solid #444;
 }
-.bg-sidebar-bg {
-  background-color: #161b25 !important;
+.border-gray-700 {
+    background-color: #1e1e1e !important;
+}
+.intro-main-container {
+  background-color: #2c3e50 !important;
+  z-index: 1000000000 !important;
 }
 
+.bg-sidebar-bg {
+  background-color: #232323 !important;
+}
+.chat-area-part {
+  background-color: #1e1e1e !important;
+}
+.from-card-bg {
+  background-color: #373737 !important;
+}
+.bg-gradient-to-br {
+  background: none;
+  border: none;
+}
+.bg-input-bg {
+  background-color: #373737 !important;
+}
+.left-sidebar-content ul li:hover {
+    background-color: #413e3e !important;
+}
 .font-bold {
   font-weight: 700 !important;
 }
