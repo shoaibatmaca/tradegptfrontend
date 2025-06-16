@@ -116,7 +116,7 @@ form input {
   color: rgb(59 130 246) !important;
 }
 .bg-primary-accent {
-  background-color: rgb(59 130 246) !important;
+  /* background-color: rgb(59 130 246) !important; */
 }
 .bg-primary-accent\/15 {
   background-color: #384457 !important;
