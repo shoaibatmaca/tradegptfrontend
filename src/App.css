@@ -2,6 +2,9 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
+.bg-primary {
+  background-color: #3d3d3d !important;
+}
 
 .search-icon {
   border-radius: 50%;

@@ -604,7 +604,7 @@ const ChatArea = ({
       {/* UPDATE: Conditional rendering for prompts vs default vs messages */}
       {showPrompts ? (
         // Show Trading Prompts Interface
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6" style={{backgroundColor:'#1e1e1e'}}>
           <TradingPromptsInline 
             isVisible={showPrompts}
             onUsePrompt={handleUsePrompt}
@@ -658,7 +658,7 @@ const ChatArea = ({
                 <div
                   className={`chat-render p-4 rounded-lg shadow whitespace-pre-wrap break-words w-full ${
                     msg.sender === "user"
-                      ? "bg-primary-accent text-white rounded-tr-none"
+                      ? "bg-primary-accent bg-primary text-white rounded-tr-none"
                       : msg.isError
                       ? "bg-red-900 bg-opacity-30 text-primary-text rounded-tl-none border border-red-400"
                       : "bg-card-bg text-primary-text rounded-tl-none"
