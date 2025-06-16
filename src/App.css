@@ -11,8 +11,14 @@ body {
   width: 45px;
   height: 45px;
 }
+.chat-render {
+  background-color: transparent !important;
+}
+.chat-bg {
+    background-color: transparent !important;
 
 
+}
 /* .chat-icon {
   width: 80px;
   height: 50px;

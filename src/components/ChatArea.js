@@ -628,7 +628,7 @@ const ChatArea = ({
         </div>
       ) : (
         // Show Chat Messages
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 chat-bg">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -656,7 +656,7 @@ const ChatArea = ({
                 </div>
 
                 <div
-                  className={`p-4 rounded-lg shadow whitespace-pre-wrap break-words w-full ${
+                  className={`chat-render p-4 rounded-lg shadow whitespace-pre-wrap break-words w-full ${
                     msg.sender === "user"
                       ? "bg-primary-accent text-white rounded-tr-none"
                       : msg.isError
