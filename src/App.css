@@ -31,17 +31,31 @@ body {
 }
 .price-box {
   line-height: 1.9rem;
-  background-color: #161b25;
+  background-color: #373737;
+}
+.highlight {
+    background: linear-gradient(to right, #a0c4ff, #ffb4a2);
+    color: white;
+    display: inline-block;
+    border-radius: 6px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
 }
 .watchlist-btns button {
   line-height: 1.5rem;
   font-size: 15px;
   font-weight: 500;
-  background-color: #161b25;
+  background-color: #373737;
   border: 1px solid #444;
 }
 .border-gray-700 {
     background-color: #1e1e1e !important;
+}
+.hover\:bg-\[\#3a3a4c\]:hover {
+      background-color: #1e1e1e !important;
+
+
 }
 .intro-main-container {
   background-color: #2c3e50 !important;

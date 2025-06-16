@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 
 const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }) => {
-  // REMOVE: Local activeItem state کیونکہ اب parent سے props آ رہا ہے
   // const [activeItem, setActiveItem] = useState("dashboard");
 
 const navigate = useNavigate();
@@ -31,7 +30,6 @@ const handleNavItemClick = (item) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
 
-  // prompt model - یہ state اب use نہیں ہو رہا، آپ چاہیں تو remove کر سکتے ہیں
   const [showModal, setShowModal] = useState(false);
 
   const handleUserClick = () => {
