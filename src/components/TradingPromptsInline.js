@@ -122,7 +122,7 @@ const TradingPromptsInline = ({ isVisible, onUsePrompt }) => {
         </h2>
       </div>
 
-      <div className="bg-[#2a3441] border border-[#3a4553] rounded-2xl p-8">
+      <div className="border border-[#3a4553] rounded-2xl p-8" style={{ backgroundColor: '#1e1e1e' }}>
         {/* Main Tabs */}
         <div className="flex gap-1 mb-6 bg-[#3a4553] rounded-lg p-1">
           <button 

@@ -15,9 +15,11 @@ body {
   background-color: transparent !important;
 }
 .chat-bg {
-    background-color: transparent !important;
+    background-color: #1e1e1e !important;
+}
 
-
+.bg-primary-accent {
+  background-color: #333333 !important;
 }
 /* .chat-icon {
   width: 80px;
