@@ -89,9 +89,10 @@ const App = () => {
                       "token"
                     )}
                     activeSessionId={activeSessionId}
-                    onSessionSelect={(sessionId) =>
-                      setActiveSessionId(sessionId)
-                    }
+                    onSessionSelect={(sessionId) => {
+                      setActiveSessionId(sessionId);
+                      setLoadSessionId(sessionId);
+                    }}
                   />
                   <ChatArea
                     toggleWatchlist={toggleWatchlist}

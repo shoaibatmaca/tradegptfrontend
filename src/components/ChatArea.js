@@ -274,7 +274,7 @@
 //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 //   };
 
-  // const handleInputChange = (e) => setInputMessage(e.target.value);
+// const handleInputChange = (e) => setInputMessage(e.target.value);
 
 //   const callOpenRouterAPI = async (messageText) => {
 //     setApiError(null);
@@ -652,6 +652,19 @@ const ChatArea = ({
     }, 100);
   };
 
+  const loadSession = async (session_id) => {
+    try {
+      setSessionId(session_id);
+      setActiveSessionId(session_id);
+      const res = await axios.get(
+        `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
+      );
+      setMessages(res.data);
+    } catch (err) {
+      console.error("Failed to load session messages:", err);
+      setApiError("Failed to load chat session.");
+    }
+  };
   const handlePromptCardClick = async (prompt) => {
     handleUsePrompt(prompt);
   };
@@ -697,19 +710,6 @@ const ChatArea = ({
     }
   }, [token, sessionId]);
 
-  const loadSession = async (session_id) => {
-    try {
-      setSessionId(session_id);
-      setActiveSessionId(session_id);
-      const res = await axios.get(
-        `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
-      );
-      setMessages(res.data);
-    } catch (err) {
-      console.error("Failed to load session messages:", err);
-      setApiError("Failed to load chat session.");
-    }
-  };
   useEffect(() => {
     if (loadSessionId) {
       loadSession(loadSessionId);
