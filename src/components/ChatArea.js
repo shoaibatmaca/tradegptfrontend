@@ -585,6 +585,8 @@
 //       setIsLoading(false);
 //     }
 //   };
+// ✅ Full corrected ChatArea.js with full history support, prompt card click, and chat continuation
+
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -608,35 +610,16 @@ const ChatArea = ({
   const messagesEndRef = useRef(null);
   const [chatSessions, setChatSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const handleInputChange = (e) => setInputMessage(e.target.value);
 
   const token = new URLSearchParams(window.location.search).get("token");
 
+  const handleInputChange = (e) => setInputMessage(e.target.value);
+
   const promptCards = [
-    {
-      id: 1,
-      title: "Top 3 Call option contracts related to EV",
-      subtitle: "with the highest likelihood of profit",
-      icon: "ev",
-    },
-    {
-      id: 2,
-      title: "Top 3 Call option contracts",
-      subtitle: "in the AI hardware sector",
-      icon: "ai",
-    },
-    {
-      id: 3,
-      title: "Get me the top 3 option contracts for NVDA",
-      subtitle: "that can yield quick profits today",
-      icon: "nvda",
-    },
-    {
-      id: 4,
-      title: "Provide shorting entry and exit for QQQ",
-      subtitle: "based on today's technical analysis",
-      icon: "qqq",
-    },
+    { id: 1, title: "Top 3 Call option contracts related to EV", subtitle: "with the highest likelihood of profit", icon: "ev" },
+    { id: 2, title: "Top 3 Call option contracts", subtitle: "in the AI hardware sector", icon: "ai" },
+    { id: 3, title: "Get me the top 3 option contracts for NVDA", subtitle: "that can yield quick profits today", icon: "nvda" },
+    { id: 4, title: "Provide shorting entry and exit for QQQ", subtitle: "based on today's technical analysis", icon: "qqq" },
   ];
 
   const handleUsePrompt = (promptText) => {
@@ -652,12 +635,30 @@ const ChatArea = ({
     handleUsePrompt(prompt);
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const res = await axios.get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`);
+        setChatSessions(res.data);
+      } catch (err) {
+        console.error("Failed to load chat sessions:", err);
+      }
+    };
+    if (token) fetchSessions();
+  }, [token]);
+
   useEffect(() => {
     const startSession = async () => {
       try {
-        const res = await axios.post(
-          `${BACKEND_URL}/api/chat/start/?token=${token}`
-        );
+        const res = await axios.post(`${BACKEND_URL}/api/chat/start/?token=${token}`);
         const newSessionId = res.data.session_id;
         setSessionId(newSessionId);
         setActiveSessionId(newSessionId);
@@ -670,6 +671,27 @@ const ChatArea = ({
       startSession();
     }
   }, [token, sessionId]);
+
+  const loadSession = async (session_id) => {
+    try {
+      setSessionId(session_id);
+      setActiveSessionId(session_id);
+      const res = await axios.get(
+        `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
+      );
+      const formattedMessages = res.data.map((msg, index) => ({
+        id: index + 1,
+        sender: msg.role,
+        text: msg.content,
+        timestamp: msg.timestamp,
+        stage: "final",
+      }));
+      setMessages(formattedMessages);
+    } catch (err) {
+      console.error("Failed to load session messages:", err);
+      setApiError("Failed to load chat session.");
+    }
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -721,7 +743,6 @@ const ChatArea = ({
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
-
       let fullText = "";
       let buffer = "";
 
@@ -731,17 +752,14 @@ const ChatArea = ({
 
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-
         const lines = buffer.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
-
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
             const cleaned = text.replace(/\*\*/g, "");
             fullText += cleaned;
-
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === streamId ? { ...m, partialText: fullText } : m
@@ -786,6 +804,7 @@ const ChatArea = ({
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col h-screen bg-[#161921] pt-[0px]">
