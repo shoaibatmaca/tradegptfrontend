@@ -56,39 +56,43 @@ const ChatArea = ({
   // }
 
   function cleanAndFormat(text) {
-  return (
-    text
-      .replace(/^markdown[#>]*\s*/i, "")
-      // Split glued words like "AppleInc." → "Apple Inc."
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
+    return (
+      text
+        // Fix glued words like "AppleInc." → "Apple Inc."
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
 
-      // Fix compressed Option X
-      .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
+        // Add spacing after ### if missing
+        .replace(/(#+)([A-Za-z])/g, "$1 $2")
 
-      // Normalize headings
-      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+        // Convert "Option X:" to headings
+        .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
 
-      // Add line breaks around headings
-      .replace(/(?<!\n)(### .+)/g, "\n\n$1")
-      .replace(/(### .+)(?!\n)/g, "$1\n\n")
+        // Add line breaks around "###" headings
+        .replace(/(?<!\n)(### .+)/g, "\n\n$1\n\n")
 
-      // Convert key-value pairs into bullets
-      .replace(/([A-Za-z \/\(\)\.%]+):\s*([^\n]+)/g, "- **$1:** $2")
+        // Convert "Key: Value" pairs into bullets
+        .replace(/([A-Za-z /%()$]+):\s*([^\n]+)/g, "- **$1:** $2")
 
-      // Remove tables and markdown noise
-      .replace(/\|.*?\|/g, "")
-      .replace(/-{3,}/g, "\n\n---\n\n")
+        // Fix "Strike:$100" to "Strike: $100"
+        .replace(/([a-zA-Z])(:)([^\s])/g, "$1: $3")
 
-      // Fix run-ons like "Strike:$100" → "Strike: $100"
-      .replace(/([a-zA-Z])(:)([^\s])/g, "$1: $3")
+        // Handle emoji bullets like "⚠️ Risks"
+        .replace(/([✅⚠️🔍🔑💡➡️📌🔥])\s*/g, "\n\n$1 ")
 
-      // Normalize spacing
-      .replace(/\n{2,}/g, "\n\n")
-      .replace(/\s{2,}/g, " ")
-      .trim()
-  );
-}
+        // Normalize dashes to breaks
+        .replace(/-{3,}/g, "\n\n---\n\n")
 
+        // Remove table pipes
+        .replace(/\|.*?\|/g, "")
+
+        // Fix double/triple spacing
+        .replace(/\s{2,}/g, " ")
+
+        // Normalize line breaks
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+    );
+  }
 
   const promptCards = [
     {
