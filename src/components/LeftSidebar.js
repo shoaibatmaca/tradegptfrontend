@@ -125,9 +125,6 @@ const LeftSidebar = ({
           </li>
         </ul>
 
-        {/* <div className="text-xs font-semibold text-secondary-text uppercase p-2">
-          {!collapsed && <span>Today</span>}
-        </div> */}
         <div className="text-xs font-semibold text-secondary-text uppercase p-2">
           {!collapsed && <span>Your Chats</span>}
         </div>
