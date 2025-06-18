@@ -58,38 +58,37 @@ const ChatArea = ({
   function cleanAndFormat(text) {
     return (
       text
-        // Fix glued words like "AppleInc." → "Apple Inc."
+        // Fix glued words: AppleInc → Apple Inc
         .replace(/([a-z])([A-Z])/g, "$1 $2")
 
-        // Add spacing after ### if missing
-        .replace(/(#+)([A-Za-z])/g, "$1 $2")
+        // Remove headings from lines like "### 1. Tesla (TSLA)" → just plain line
+        .replace(/#{2,6}\s*(\d+\.\s?[A-Z][^\n]+)/g, "\n\n$1")
 
-        // Convert "Option X:" to headings
-        .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
+        // Keep Option 1/2/3 with proper heading
+        .replace(/Option\s*(\d+)\s*:/gi, "\n\n### Option $1")
 
-        // Add line breaks around "###" headings
-        .replace(/(?<!\n)(### .+)/g, "\n\n$1\n\n")
+        // Normalize leftover ###
+        .replace(/#{3,6}\s*/g, "\n\n### ")
 
-        // Convert "Key: Value" pairs into bullets
-        .replace(/([A-Za-z /%()$]+):\s*([^\n]+)/g, "- **$1:** $2")
+        // Remove **bold** and *italic* completely
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
 
-        // Fix "Strike:$100" to "Strike: $100"
+        // Key: Value → bullet format
+        .replace(/([A-Za-z0-9\(\)\/%$\- ]+):\s*([^\n]+)/g, "- **$1:** $2")
+
+        // Fix glued colon
         .replace(/([a-zA-Z])(:)([^\s])/g, "$1: $3")
 
-        // Handle emoji bullets like "⚠️ Risks"
-        .replace(/([✅⚠️🔍🔑💡➡️📌🔥])\s*/g, "\n\n$1 ")
-
-        // Normalize dashes to breaks
+        // Remove tables, separators
+        .replace(/\|.*?\|/g, "")
         .replace(/-{3,}/g, "\n\n---\n\n")
 
-        // Remove table pipes
-        .replace(/\|.*?\|/g, "")
-
-        // Fix double/triple spacing
+        // Cleanup spacing
+        .replace(/\n{3,}/g, "\n\n")
         .replace(/\s{2,}/g, " ")
 
-        // Normalize line breaks
-        .replace(/\n{3,}/g, "\n\n")
         .trim()
     );
   }
