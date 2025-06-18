@@ -608,6 +608,8 @@ const ChatArea = ({
   const messagesEndRef = useRef(null);
   const [chatSessions, setChatSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
+  const handleInputChange = (e) => setInputMessage(e.target.value);
+
   const token = new URLSearchParams(window.location.search).get("token");
 
   const promptCards = [
