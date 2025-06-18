@@ -15,6 +15,7 @@ const App = () => {
   const [showPrompts, setShowPrompts] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [activeSessionId, setActiveSessionId] = useState(null);
+  const [loadSessionId, setLoadSessionId] = useState(null);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);

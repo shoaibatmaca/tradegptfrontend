@@ -274,7 +274,7 @@
 //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 //   };
 
-//   const handleInputChange = (e) => setInputMessage(e.target.value);
+  // const handleInputChange = (e) => setInputMessage(e.target.value);
 
 //   const callOpenRouterAPI = async (messageText) => {
 //     setApiError(null);
