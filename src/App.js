@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-import ChatArea from "./components/ChatArea";
 import LeftSidebar from "./components/LeftSidebar";
 import IntroToTradeGPT from "./components/TradeGptIntro"; // make sure this file exists
 import Watchlist from "./components/Watchlist";
@@ -84,19 +83,30 @@ const App = () => {
               <Route
                 path="*"
                 element={
+                  <ChatArea
+                    toggleWatchlist={toggleWatchlist}
+                    watchlistMessage={watchlistMessage}
+                    showPrompts={showPrompts}
+                    onClosePrompts={handleClosePrompts}
+                    activeSection={activeSection}
+                  />
+                }
+              />
+              {/* <Route
+                path="*"
+                element={
                   <div className="flex flex-1">
-                    {/* Remove ChatSessionSidebar from here */}
                     <ChatArea
                       toggleWatchlist={toggleWatchlist}
                       watchlistMessage={watchlistMessage}
                       showPrompts={showPrompts}
                       onClosePrompts={handleClosePrompts}
                       activeSection={activeSection}
-                      loadSessionId={loadSessionId} // ✅ This is enough now
+                      // loadSessionId={loadSessionId} // ✅ This is enough now
                     />
                   </div>
                 }
-              />
+              /> */}
             </Routes>
           </Routes>
         </div>
