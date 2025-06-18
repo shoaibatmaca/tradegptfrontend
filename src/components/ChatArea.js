@@ -1,3 +1,590 @@
+// import axios from "axios";
+// import { useEffect, useRef, useState } from "react";
+// import ReactMarkdown from "react-markdown";
+// import PromptCard from "./PromptCard";
+// import TradingPromptsInline from "./TradingPromptsInline";
+
+// const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
+
+// // ADD: Update props to include prompts functionality
+// const ChatArea = ({
+//   toggleWatchlist,
+//   watchlistMessage,
+//   showPrompts,
+//   onClosePrompts,
+//   activeSection,
+// }) => {
+//   const [messages, setMessages] = useState([]);
+//   const [inputMessage, setInputMessage] = useState("");
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [apiError, setApiError] = useState(null);
+//   const [sessionId, setSessionId] = useState(null);
+//   const messagesEndRef = useRef(null);
+//   const [chatSessions, setChatSessions] = useState([]);
+//   const [activeSessionId, setActiveSessionId] = useState(null);
+//   const token = new URLSearchParams(window.location.search).get("token");
+
+//   // ... (all your existing functions remain the same: cleanAndFormat, scrollToBottom, etc.)
+//   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
+
+//   function cleanAndFormat(text) {
+//     return text
+//       .replace(/^markdown[#>]*\s*/i, "")
+//       .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
+//       .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+//       .replace(/\*\*(.*?)\*\*/g, "$1")
+//       .replace(/\*(.*?)\*/g, "$1")
+//       .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
+//       .replace(/\|.*?\|/g, "")
+//       .replace(/-{3,}/g, "\n\n---\n\n")
+//       .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ")
+//       .replace(/###\s*#\s*/g, "### ")
+//       .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
+//       .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
+//       .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
+//       .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
+//       .replace(/AnalystInsights/gi, "Analyst Insights")
+//       .replace(/UpcomingEvents/gi, "Upcoming Events")
+//       .replace(/TechnicalIndicators/gi, "Technical Indicators")
+//       .replace(/Competitors/gi, "Competitors")
+//       .replace(/Note\s*:/gi, "\n\n**Note:** ")
+//       .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
+//       .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
+//       .replace(/\n{2,}/g, "\n\n")
+//       .replace(/\s{2,}/g, " ")
+//       .trim();
+//   }
+
+//   const promptCards = [
+//     {
+//       id: 1,
+//       title: "Top 3 Call option contracts related to EV",
+//       subtitle: "with the highest likelihood of profit",
+//       icon: "ev",
+//     },
+//     {
+//       id: 2,
+//       title: "Top 3 Call option contracts",
+//       subtitle: "in the AI hardware sector",
+//       icon: "ai",
+//     },
+//     {
+//       id: 3,
+//       title: "Get me the top 3 option contracts for NVDA",
+//       subtitle: "that can yield quick profits today",
+//       icon: "nvda",
+//     },
+//     {
+//       id: 4,
+//       title: "Provide shorting entry and exit for QQQ",
+//       subtitle: "based on today's technical analysis",
+//       icon: "qqq",
+//     },
+//   ];
+
+//   // ADD: Handle using prompts from TradingPromptsInline
+//   const handleUsePrompt = (promptText) => {
+//     setInputMessage(promptText);
+//     if (onClosePrompts) {
+//       onClosePrompts(); // Close prompts and go back to chat
+//     }
+//     // Automatically send the message
+//     setTimeout(() => {
+//       const event = { preventDefault: () => {} };
+//       handleSendMessage(event);
+//     }, 100);
+//   };
+
+//   // ... (all your existing useEffect and functions remain exactly the same)
+//   useEffect(() => {
+//     scrollToBottom();
+//   }, [messages]);
+
+//   useEffect(() => {
+//     if (token) {
+//       axios
+//         .get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
+//         .then((res) => {
+//           setChatSessions(res.data);
+//         })
+//         .catch((err) => {
+//           console.error("Failed to load chat sessions:", err);
+//         });
+//     }
+//   }, [token]);
+
+//   const loadSession = async (session_id) => {
+//     try {
+//       setSessionId(session_id);
+//       setActiveSessionId(session_id);
+//       const res = await axios.get(
+//         `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
+//       );
+//       setMessages(res.data);
+//     } catch (err) {
+//       console.error("Failed to load session messages:", err);
+//       setApiError("Failed to load chat session.");
+//     }
+//   };
+
+//   const handleSendWatchlistMessage = async (msg) => {
+//     setIsLoading(true);
+
+//     const baseId = Date.now();
+//     const steps = [
+//       "Retrieved detailed company information.",
+//       "Retrieved fundamental ratios for the stock.",
+//       "Retrieved company earnings reports information.",
+//       "Consolidating and analyzing information...",
+//     ];
+
+//     setMessages((prev) => [
+//       ...prev,
+//       {
+//         id: baseId,
+//         sender: "ai",
+//         stage: "progress",
+//         steps: steps.map((text) => ({ text, done: false })),
+//         timestamp: new Date(),
+//       },
+//     ]);
+
+//     const updateStep = (stepIndex) => {
+//       setMessages((prev) =>
+//         prev.map((msg) =>
+//           msg.id === baseId
+//             ? {
+//                 ...msg,
+//                 steps: msg.steps.map((s, i) =>
+//                   i === stepIndex ? { ...s, done: true } : s
+//                 ),
+//               }
+//             : msg
+//         )
+//       );
+//     };
+
+//     for (let i = 0; i < 3; i++) {
+//       await new Promise((r) => setTimeout(r, 1200));
+//       updateStep(i);
+//     }
+
+//     updateStep(3);
+
+//     const streamId = `${baseId}-stream`;
+
+//     setMessages((prev) => [
+//       ...prev,
+//       {
+//         id: streamId,
+//         sender: "ai",
+//         stage: "streaming",
+//         partialText: "",
+//         timestamp: new Date(),
+//         queryType: msg.queryType || "default",
+//       },
+//     ]);
+
+//     try {
+//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/stream`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(msg),
+//       });
+
+//       const reader = res.body.getReader();
+//       const decoder = new TextDecoder("utf-8");
+
+//       let fullText = "";
+//       let buffer = "";
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+
+//         const chunk = decoder.decode(value, { stream: true });
+//         buffer += chunk;
+
+//         const lines = buffer.split("\n");
+
+//         for (let i = 0; i < lines.length; i++) {
+//           const line = lines[i].trim();
+
+//           if (line.startsWith("data:")) {
+//             const text = line.replace("data:", "").trim();
+//             const cleaned =
+//               msg.queryType === "default" ? cleanAndFormat(text) : text;
+
+//             fullText += cleaned;
+
+//             setMessages((prev) =>
+//               prev.map((m) =>
+//                 m.id === streamId ? { ...m, partialText: fullText } : m
+//               )
+//             );
+
+//             await new Promise((r) => setTimeout(r, 20));
+//           }
+//         }
+
+//         buffer = "";
+//       }
+
+//       if (buffer.length > 0) {
+//         fullText += buffer;
+//         setMessages((prev) =>
+//           prev.map((m) =>
+//             m.id === streamId ? { ...m, partialText: fullText } : m
+//           )
+//         );
+//       }
+
+//       setMessages((prev) =>
+//         prev.map((m) =>
+//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+//         )
+//       );
+//     } catch (err) {
+//       console.error("Stream Error:", err);
+//       setMessages((prev) => [
+//         ...prev,
+//         {
+//           id: `${baseId}-error`,
+//           sender: "ai",
+//           text: "Streaming failed.",
+//           isError: true,
+//           timestamp: new Date(),
+//         },
+//       ]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (
+//       (typeof watchlistMessage === "string" && watchlistMessage.trim()) ||
+//       (typeof watchlistMessage === "object" && watchlistMessage !== null)
+//     ) {
+//       handleSendWatchlistMessage(watchlistMessage);
+//     }
+//   }, [watchlistMessage]);
+
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+//   };
+
+//   const handleInputChange = (e) => setInputMessage(e.target.value);
+
+//   const callOpenRouterAPI = async (messageText) => {
+//     setApiError(null);
+
+//     const streamId = `${Date.now()}-directstream`;
+
+//     setMessages((prev) => [
+//       ...prev,
+//       {
+//         id: streamId,
+//         sender: "ai",
+//         stage: "streaming",
+//         partialText: "",
+//         timestamp: new Date(),
+//         queryType: "direct",
+//       },
+//     ]);
+
+//     try {
+//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ message: messageText }),
+//       });
+
+//       const reader = res.body.getReader();
+//       const decoder = new TextDecoder("utf-8");
+
+//       let fullText = "";
+//       let buffer = "";
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+
+//         const chunk = decoder.decode(value, { stream: true });
+//         buffer += chunk;
+
+//         const lines = buffer.split("\n");
+
+//         for (let i = 0; i < lines.length; i++) {
+//           const line = lines[i].trim();
+
+//           if (line.startsWith("data:")) {
+//             const text = line.replace("data:", "").trim();
+//             const cleaned = cleanAndFormat(text);
+//             fullText += cleaned;
+
+//             setMessages((prev) =>
+//               prev.map((m) =>
+//                 m.id === streamId ? { ...m, partialText: fullText } : m
+//               )
+//             );
+//           }
+//         }
+
+//         buffer = "";
+//       }
+
+//       setMessages((prev) =>
+//         prev.map((m) =>
+//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+//         )
+//       );
+//     } catch (err) {
+//       console.error("Direct chat stream error:", err);
+//       setMessages((prev) => [
+//         ...prev,
+//         {
+//           id: `${streamId}-error`,
+//           sender: "ai",
+//           text: "Streaming failed.",
+//           isError: true,
+//           timestamp: new Date(),
+//         },
+//       ]);
+//     }
+//   };
+
+//   const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
+//     const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
+//     const symbol = match?.[1]?.toUpperCase();
+//     if (!symbol) return "Invalid stock symbol.";
+
+//     try {
+//       const quoteRes = await axios.get(
+//         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=04RGF1U9PAJ49VYI`
+//       );
+
+//       const timeSeries = quoteRes.data["Time Series (Daily)"];
+//       if (!timeSeries) throw new Error("Alpha Vantage data invalid");
+
+//       const [latestDate, previousDate] = Object.keys(timeSeries);
+//       const today = timeSeries[latestDate];
+//       const previous = timeSeries[previousDate];
+
+//       const closeToday = parseFloat(today["4. close"]);
+//       const closePrev = parseFloat(previous["4. close"]);
+
+//       const summary = `${symbol} is trading at $${closeToday.toFixed(
+//         2
+//       )}, change: ${(closeToday - closePrev).toFixed(2)} (${(
+//         ((closeToday - closePrev) / closePrev) *
+//         100
+//       ).toFixed(2)}%).`;
+
+//       const aiRes = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, {
+//         model: "deepseek-chat",
+//         messages: [
+//           {
+//             role: "system",
+//             content: "You are DeepSeek V3, a financial trading assistant.",
+//           },
+//           {
+//             role: "user",
+//             content: `Stock info for ${symbol}: ${summary}. Analyze this from a trading perspective.`,
+//           },
+//         ],
+//         stream: false,
+//       });
+
+//       return aiRes.data.message || aiRes.data.content || "No AI response.";
+//     } catch (error) {
+//       console.error("DeepSeek V3 error:", error);
+//       return `Error retrieving info for ${symbol}.`;
+//     }
+//   };
+
+//   const handleSendMessage = async (e) => {
+//     e.preventDefault();
+//     if (!inputMessage.trim()) return;
+
+//     const userMsg = {
+//       id: messages.length + 1,
+//       text: inputMessage,
+//       sender: "user",
+//       timestamp: new Date(),
+//     };
+
+//     setMessages((prev) => [...prev, userMsg]);
+//     setInputMessage("");
+//     setIsLoading(true);
+
+//     const streamId = `${Date.now()}-directstream`;
+
+//     setMessages((prev) => [
+//       ...prev,
+//       {
+//         id: streamId,
+//         sender: "ai",
+//         stage: "streaming",
+//         partialText: "",
+//         timestamp: new Date(),
+//         queryType: "direct",
+//       },
+//     ]);
+
+//     try {
+//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ message: inputMessage }),
+//       });
+
+//       const reader = res.body.getReader();
+//       const decoder = new TextDecoder("utf-8");
+
+//       let fullText = "";
+//       let buffer = "";
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+
+//         const chunk = decoder.decode(value, { stream: true });
+//         buffer += chunk;
+
+//         const lines = buffer.split("\n");
+
+//         for (let i = 0; i < lines.length; i++) {
+//           const line = lines[i].trim();
+
+//           if (line.startsWith("data:")) {
+//             const text = line.replace("data:", "").trim();
+//             const cleaned = cleanAndFormat(text);
+
+//             fullText += cleaned;
+
+//             setMessages((prev) =>
+//               prev.map((m) =>
+//                 m.id === streamId ? { ...m, partialText: fullText } : m
+//               )
+//             );
+//           }
+//         }
+
+//         buffer = "";
+//       }
+
+//       setMessages((prev) =>
+//         prev.map((m) =>
+//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+//         )
+//       );
+//     } catch (err) {
+//       console.error("Stream error:", err);
+//       setMessages((prev) => [
+//         ...prev,
+//         {
+//           id: `${streamId}-error`,
+//           sender: "ai",
+//           text: "Streaming failed.",
+//           isError: true,
+//           timestamp: new Date(),
+//         },
+//       ]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   const handlePromptCardClick = async (prompt) => {
+//     if (isLoading) return;
+
+//     const userMsg = {
+//       id: messages.length + 1,
+//       text: prompt,
+//       sender: "user",
+//       timestamp: new Date(),
+//     };
+
+//     setMessages((prev) => [...prev, userMsg]);
+//     setIsLoading(true);
+
+//     const streamId = `${Date.now()}-promptstream`;
+
+//     setMessages((prev) => [
+//       ...prev,
+//       {
+//         id: streamId,
+//         sender: "ai",
+//         stage: "streaming",
+//         partialText: "",
+//         timestamp: new Date(),
+//         queryType: "direct",
+//       },
+//     ]);
+
+//     try {
+//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ message: prompt }),
+//       });
+
+//       const reader = res.body.getReader();
+//       const decoder = new TextDecoder("utf-8");
+
+//       let fullText = "";
+//       let buffer = "";
+
+//       while (true) {
+//         const { done, value } = await reader.read();
+//         if (done) break;
+
+//         const chunk = decoder.decode(value, { stream: true });
+//         buffer += chunk;
+
+//         const lines = buffer.split("\n");
+
+//         for (let i = 0; i < lines.length; i++) {
+//           const line = lines[i].trim();
+//           if (line.startsWith("data:")) {
+//             const text = line.replace("data:", "").trim();
+//             const cleaned = cleanAndFormat(text);
+
+//             fullText += cleaned;
+
+//             setMessages((prev) =>
+//               prev.map((m) =>
+//                 m.id === streamId ? { ...m, partialText: fullText } : m
+//               )
+//             );
+//           }
+//         }
+
+//         buffer = "";
+//       }
+
+//       setMessages((prev) =>
+//         prev.map((m) =>
+//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
+//         )
+//       );
+//     } catch (err) {
+//       console.error("Streaming error:", err);
+//       setMessages((prev) => [
+//         ...prev,
+//         {
+//           id: `${streamId}-error`,
+//           sender: "ai",
+//           text: "Streaming failed.",
+//           isError: true,
+//           timestamp: new Date(),
+//         },
+//       ]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -6,7 +593,6 @@ import TradingPromptsInline from "./TradingPromptsInline";
 
 const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
 
-// ADD: Update props to include prompts functionality
 const ChatArea = ({
   toggleWatchlist,
   watchlistMessage,
@@ -24,10 +610,36 @@ const ChatArea = ({
   const [activeSessionId, setActiveSessionId] = useState(null);
   const token = new URLSearchParams(window.location.search).get("token");
 
-  // ... (all your existing functions remain the same: cleanAndFormat, scrollToBottom, etc.)
-  const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
+  useEffect(() => {
+    const startSession = async () => {
+      try {
+        const res = await axios.post(
+          `${BACKEND_URL}/api/chat/start/?token=${token}`
+        );
+        const newSessionId = res.data.session_id;
+        setSessionId(newSessionId);
+        setActiveSessionId(newSessionId);
+      } catch (err) {
+        console.error("Failed to start session:", err);
+      }
+    };
 
-  function cleanAndFormat(text) {
+    if (token && !sessionId) {
+      startSession();
+    }
+  }, [token, sessionId]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleInputChange = (e) => setInputMessage(e.target.value);
+
+  const cleanAndFormat = (text) => {
     return text
       .replace(/^markdown[#>]*\s*/i, "")
       .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
@@ -37,370 +649,9 @@ const ChatArea = ({
       .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
       .replace(/\|.*?\|/g, "")
       .replace(/-{3,}/g, "\n\n---\n\n")
-      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ")
-      .replace(/###\s*#\s*/g, "### ")
-      .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
-      .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
-      .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
-      .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
-      .replace(/AnalystInsights/gi, "Analyst Insights")
-      .replace(/UpcomingEvents/gi, "Upcoming Events")
-      .replace(/TechnicalIndicators/gi, "Technical Indicators")
-      .replace(/Competitors/gi, "Competitors")
-      .replace(/Note\s*:/gi, "\n\n**Note:** ")
-      .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
-      .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
-      .replace(/\n{2,}/g, "\n\n")
       .replace(/\s{2,}/g, " ")
+      .replace(/\n{2,}/g, "\n\n")
       .trim();
-  }
-
-  const promptCards = [
-    {
-      id: 1,
-      title: "Top 3 Call option contracts related to EV",
-      subtitle: "with the highest likelihood of profit",
-      icon: "ev",
-    },
-    {
-      id: 2,
-      title: "Top 3 Call option contracts",
-      subtitle: "in the AI hardware sector",
-      icon: "ai",
-    },
-    {
-      id: 3,
-      title: "Get me the top 3 option contracts for NVDA",
-      subtitle: "that can yield quick profits today",
-      icon: "nvda",
-    },
-    {
-      id: 4,
-      title: "Provide shorting entry and exit for QQQ",
-      subtitle: "based on today's technical analysis",
-      icon: "qqq",
-    },
-  ];
-
-  // ADD: Handle using prompts from TradingPromptsInline
-  const handleUsePrompt = (promptText) => {
-    setInputMessage(promptText);
-    if (onClosePrompts) {
-      onClosePrompts(); // Close prompts and go back to chat
-    }
-    // Automatically send the message
-    setTimeout(() => {
-      const event = { preventDefault: () => {} };
-      handleSendMessage(event);
-    }, 100);
-  };
-
-  // ... (all your existing useEffect and functions remain exactly the same)
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  useEffect(() => {
-    if (token) {
-      axios
-        .get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
-        .then((res) => {
-          setChatSessions(res.data);
-        })
-        .catch((err) => {
-          console.error("Failed to load chat sessions:", err);
-        });
-    }
-  }, [token]);
-
-  const loadSession = async (session_id) => {
-    try {
-      setSessionId(session_id);
-      setActiveSessionId(session_id);
-      const res = await axios.get(
-        `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
-      );
-      setMessages(res.data);
-    } catch (err) {
-      console.error("Failed to load session messages:", err);
-      setApiError("Failed to load chat session.");
-    }
-  };
-
-  const handleSendWatchlistMessage = async (msg) => {
-    setIsLoading(true);
-
-    const baseId = Date.now();
-    const steps = [
-      "Retrieved detailed company information.",
-      "Retrieved fundamental ratios for the stock.",
-      "Retrieved company earnings reports information.",
-      "Consolidating and analyzing information...",
-    ];
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: baseId,
-        sender: "ai",
-        stage: "progress",
-        steps: steps.map((text) => ({ text, done: false })),
-        timestamp: new Date(),
-      },
-    ]);
-
-    const updateStep = (stepIndex) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === baseId
-            ? {
-                ...msg,
-                steps: msg.steps.map((s, i) =>
-                  i === stepIndex ? { ...s, done: true } : s
-                ),
-              }
-            : msg
-        )
-      );
-    };
-
-    for (let i = 0; i < 3; i++) {
-      await new Promise((r) => setTimeout(r, 1200));
-      updateStep(i);
-    }
-
-    updateStep(3);
-
-    const streamId = `${baseId}-stream`;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: streamId,
-        sender: "ai",
-        stage: "streaming",
-        partialText: "",
-        timestamp: new Date(),
-        queryType: msg.queryType || "default",
-      },
-    ]);
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/stream`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(msg),
-      });
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      let fullText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-
-          if (line.startsWith("data:")) {
-            const text = line.replace("data:", "").trim();
-            const cleaned =
-              msg.queryType === "default" ? cleanAndFormat(text) : text;
-
-            fullText += cleaned;
-
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === streamId ? { ...m, partialText: fullText } : m
-              )
-            );
-
-            await new Promise((r) => setTimeout(r, 20));
-          }
-        }
-
-        buffer = "";
-      }
-
-      if (buffer.length > 0) {
-        fullText += buffer;
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === streamId ? { ...m, partialText: fullText } : m
-          )
-        );
-      }
-
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-        )
-      );
-    } catch (err) {
-      console.error("Stream Error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `${baseId}-error`,
-          sender: "ai",
-          text: "Streaming failed.",
-          isError: true,
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (
-      (typeof watchlistMessage === "string" && watchlistMessage.trim()) ||
-      (typeof watchlistMessage === "object" && watchlistMessage !== null)
-    ) {
-      handleSendWatchlistMessage(watchlistMessage);
-    }
-  }, [watchlistMessage]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleInputChange = (e) => setInputMessage(e.target.value);
-
-  const callOpenRouterAPI = async (messageText) => {
-    setApiError(null);
-
-    const streamId = `${Date.now()}-directstream`;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: streamId,
-        sender: "ai",
-        stage: "streaming",
-        partialText: "",
-        timestamp: new Date(),
-        queryType: "direct",
-      },
-    ]);
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText }),
-      });
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      let fullText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-
-          if (line.startsWith("data:")) {
-            const text = line.replace("data:", "").trim();
-            const cleaned = cleanAndFormat(text);
-            fullText += cleaned;
-
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === streamId ? { ...m, partialText: fullText } : m
-              )
-            );
-          }
-        }
-
-        buffer = "";
-      }
-
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-        )
-      );
-    } catch (err) {
-      console.error("Direct chat stream error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `${streamId}-error`,
-          sender: "ai",
-          text: "Streaming failed.",
-          isError: true,
-          timestamp: new Date(),
-        },
-      ]);
-    }
-  };
-
-  const callFinhubAndAnalyzeWithOpenRouter = async (messageText) => {
-    const match = messageText.toLowerCase().match(/stock for ([A-Z]{1,5})/i);
-    const symbol = match?.[1]?.toUpperCase();
-    if (!symbol) return "Invalid stock symbol.";
-
-    try {
-      const quoteRes = await axios.get(
-        `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=04RGF1U9PAJ49VYI`
-      );
-
-      const timeSeries = quoteRes.data["Time Series (Daily)"];
-      if (!timeSeries) throw new Error("Alpha Vantage data invalid");
-
-      const [latestDate, previousDate] = Object.keys(timeSeries);
-      const today = timeSeries[latestDate];
-      const previous = timeSeries[previousDate];
-
-      const closeToday = parseFloat(today["4. close"]);
-      const closePrev = parseFloat(previous["4. close"]);
-
-      const summary = `${symbol} is trading at $${closeToday.toFixed(
-        2
-      )}, change: ${(closeToday - closePrev).toFixed(2)} (${(
-        ((closeToday - closePrev) / closePrev) *
-        100
-      ).toFixed(2)}%).`;
-
-      const aiRes = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, {
-        model: "deepseek-chat",
-        messages: [
-          {
-            role: "system",
-            content: "You are DeepSeek V3, a financial trading assistant.",
-          },
-          {
-            role: "user",
-            content: `Stock info for ${symbol}: ${summary}. Analyze this from a trading perspective.`,
-          },
-        ],
-        stream: false,
-      });
-
-      return aiRes.data.message || aiRes.data.content || "No AI response.";
-    } catch (error) {
-      console.error("DeepSeek V3 error:", error);
-      return `Error retrieving info for ${symbol}.`;
-    }
   };
 
   const handleSendMessage = async (e) => {
@@ -417,6 +668,19 @@ const ChatArea = ({
     setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
     setIsLoading(true);
+
+    // ✅ Save user message to backend
+    try {
+      await axios.post(
+        `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
+        {
+          role: "user",
+          content: inputMessage,
+        }
+      );
+    } catch (err) {
+      console.error("Failed to save user message:", err);
+    }
 
     const streamId = `${Date.now()}-directstream`;
 
@@ -460,7 +724,6 @@ const ChatArea = ({
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
             const cleaned = cleanAndFormat(text);
-
             fullText += cleaned;
 
             setMessages((prev) =>
@@ -479,98 +742,21 @@ const ChatArea = ({
           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
         )
       );
+
+      // ✅ Save AI message to backend
+      try {
+        await axios.post(
+          `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
+          {
+            role: "ai",
+            content: fullText,
+          }
+        );
+      } catch (err) {
+        console.error("Failed to save AI message:", err);
+      }
     } catch (err) {
       console.error("Stream error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `${streamId}-error`,
-          sender: "ai",
-          text: "Streaming failed.",
-          isError: true,
-          timestamp: new Date(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePromptCardClick = async (prompt) => {
-    if (isLoading) return;
-
-    const userMsg = {
-      id: messages.length + 1,
-      text: prompt,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setIsLoading(true);
-
-    const streamId = `${Date.now()}-promptstream`;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: streamId,
-        sender: "ai",
-        stage: "streaming",
-        partialText: "",
-        timestamp: new Date(),
-        queryType: "direct",
-      },
-    ]);
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: prompt }),
-      });
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      let fullText = "";
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split("\n");
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (line.startsWith("data:")) {
-            const text = line.replace("data:", "").trim();
-            const cleaned = cleanAndFormat(text);
-
-            fullText += cleaned;
-
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === streamId ? { ...m, partialText: fullText } : m
-              )
-            );
-          }
-        }
-
-        buffer = "";
-      }
-
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-        )
-      );
-    } catch (err) {
-      console.error("Streaming error:", err);
       setMessages((prev) => [
         ...prev,
         {
