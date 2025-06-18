@@ -125,7 +125,7 @@ const LeftSidebar = ({
           {!collapsed && <span>Your Chats</span>}
         </div>
 
-        {/* <ul className="p-2 list-item space-y-1">
+        <ul className="p-2 list-item space-y-1">
           {sessions.map((session) => (
             <li
               key={session.session_id}
@@ -146,8 +146,8 @@ const LeftSidebar = ({
               )}
             </li>
           ))}
-        </ul> */}
-        <ul className="p-2 list-item space-y-1">
+        </ul>
+        {/* <ul className="p-2 list-item space-y-1">
           {sessions.map((session) => (
             <li
               key={session.session_id}
@@ -171,7 +171,7 @@ const LeftSidebar = ({
               )}
             </li>
           ))}
-        </ul>
+        </ul> */}
 
         <ul className="p-2 list-item">
           <li

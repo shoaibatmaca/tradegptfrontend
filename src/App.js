@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
+import ChatArea from "./components/ChatArea";
 import LeftSidebar from "./components/LeftSidebar";
 import IntroToTradeGPT from "./components/TradeGptIntro"; // make sure this file exists
 import Watchlist from "./components/Watchlist";
@@ -13,7 +14,6 @@ const App = () => {
   const [showPrompts, setShowPrompts] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
   const [activeSessionId, setActiveSessionId] = useState(null);
-  const [loadSessionId, setLoadSessionId] = useState(null);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -56,7 +56,6 @@ const App = () => {
           toggleSidebar={toggleSidebar}
           onNavItemClick={handleNavItemClick}
           activeSection={activeSection}
-          setLoadSessionId={setLoadSessionId}
         />
 
         <div
@@ -65,49 +64,19 @@ const App = () => {
           } transition-all duration-300`}
         >
           <Routes>
-            {/* <Route path="/intro" element={<IntroToTradeGPT />} /> */}
-            {/* <Route
+            <Route path="/intro" element={<IntroToTradeGPT />} />
+            <Route
               path="*"
               element={
-                <ChatArea 
-                  toggleWatchlist={toggleWatchlist} 
+                <ChatArea
+                  toggleWatchlist={toggleWatchlist}
                   watchlistMessage={watchlistMessage}
                   showPrompts={showPrompts}
                   onClosePrompts={handleClosePrompts}
                   activeSection={activeSection}
                 />
               }
-            /> */}
-            <Routes>
-              <Route path="/intro" element={<IntroToTradeGPT />} />
-              <Route
-                path="*"
-                element={
-                  <ChatArea
-                    toggleWatchlist={toggleWatchlist}
-                    watchlistMessage={watchlistMessage}
-                    showPrompts={showPrompts}
-                    onClosePrompts={handleClosePrompts}
-                    activeSection={activeSection}
-                  />
-                }
-              />
-              {/* <Route
-                path="*"
-                element={
-                  <div className="flex flex-1">
-                    <ChatArea
-                      toggleWatchlist={toggleWatchlist}
-                      watchlistMessage={watchlistMessage}
-                      showPrompts={showPrompts}
-                      onClosePrompts={handleClosePrompts}
-                      activeSection={activeSection}
-                      // loadSessionId={loadSessionId} // ✅ This is enough now
-                    />
-                  </div>
-                }
-              /> */}
-            </Routes>
+            />
           </Routes>
         </div>
 
