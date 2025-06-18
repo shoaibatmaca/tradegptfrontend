@@ -10,7 +10,7 @@ const LeftSidebar = ({
   toggleSidebar,
   onNavItemClick,
   activeSection,
-  setLoadSessionId,
+  // setLoadSessionId,
 }) => {
   // const [activeItem, setActiveItem] = useState("dashboard");
 
@@ -156,7 +156,7 @@ const LeftSidebar = ({
               }`}
               onClick={() => {
                 handleNavItemClick(session.session_id);
-                setLoadSessionId(session.session_id); // ✅ FIXED
+                // setLoadSessionId(session.session_id); // ✅ FIXED
               }}
             >
               <i className="bi bi-chat-dots-fill mr-2 text-base"></i>

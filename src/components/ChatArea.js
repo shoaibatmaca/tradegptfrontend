@@ -996,7 +996,7 @@ const ChatArea = ({
   toggleWatchlist,
   watchlistMessage,
   showPrompts,
-  loadSessionId,
+  // loadSessionId,
   onClosePrompts,
   activeSection,
 }) => {
