@@ -610,6 +610,46 @@ const ChatArea = ({
   const [activeSessionId, setActiveSessionId] = useState(null);
   const token = new URLSearchParams(window.location.search).get("token");
 
+  const promptCards = [
+    {
+      id: 1,
+      title: "Top 3 Call option contracts related to EV",
+      subtitle: "with the highest likelihood of profit",
+      icon: "ev",
+    },
+    {
+      id: 2,
+      title: "Top 3 Call option contracts",
+      subtitle: "in the AI hardware sector",
+      icon: "ai",
+    },
+    {
+      id: 3,
+      title: "Get me the top 3 option contracts for NVDA",
+      subtitle: "that can yield quick profits today",
+      icon: "nvda",
+    },
+    {
+      id: 4,
+      title: "Provide shorting entry and exit for QQQ",
+      subtitle: "based on today's technical analysis",
+      icon: "qqq",
+    },
+  ];
+
+  const handleUsePrompt = (promptText) => {
+    setInputMessage(promptText);
+    if (onClosePrompts) onClosePrompts();
+    setTimeout(() => {
+      const event = { preventDefault: () => {} };
+      handleSendMessage(event);
+    }, 100);
+  };
+
+  const handlePromptCardClick = async (prompt) => {
+    handleUsePrompt(prompt);
+  };
+
   useEffect(() => {
     const startSession = async () => {
       try {
@@ -629,31 +669,6 @@ const ChatArea = ({
     }
   }, [token, sessionId]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleInputChange = (e) => setInputMessage(e.target.value);
-
-  const cleanAndFormat = (text) => {
-    return text
-      .replace(/^markdown[#>]*\s*/i, "")
-      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
-      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*(.*?)\*/g, "$1")
-      .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
-      .replace(/\|.*?\|/g, "")
-      .replace(/-{3,}/g, "\n\n---\n\n")
-      .replace(/\s{2,}/g, " ")
-      .replace(/\n{2,}/g, "\n\n")
-      .trim();
-  };
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
@@ -669,7 +684,6 @@ const ChatArea = ({
     setInputMessage("");
     setIsLoading(true);
 
-    // ✅ Save user message to backend
     try {
       await axios.post(
         `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
@@ -723,7 +737,7 @@ const ChatArea = ({
 
           if (line.startsWith("data:")) {
             const text = line.replace("data:", "").trim();
-            const cleaned = cleanAndFormat(text);
+            const cleaned = text.replace(/\*\*/g, "");
             fullText += cleaned;
 
             setMessages((prev) =>
@@ -743,7 +757,6 @@ const ChatArea = ({
         )
       );
 
-      // ✅ Save AI message to backend
       try {
         await axios.post(
           `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
