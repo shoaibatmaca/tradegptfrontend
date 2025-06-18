@@ -4,7 +4,7 @@ import UserProfileModal from "./UserProfileModal";
 
 // import jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
-
+const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
 const LeftSidebar = ({
   collapsed,
   toggleSidebar,
@@ -20,16 +20,11 @@ const LeftSidebar = ({
     const token = new URLSearchParams(window.location.search).get("token");
     if (!token) return;
 
-    fetch(
-      `${
-        process.env.REACT_APP_API_URL || ""
-      }/api/chat/user-sessions/?token=${token}`
-    )
+    fetch(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
       .then((res) => res.json())
       .then((data) => setSessions(data))
       .catch((err) => console.error("Failed to fetch sessions", err));
   }, []);
-
   const handleNavItemClick = (item) => {
     if (onNavItemClick) {
       onNavItemClick(item);
