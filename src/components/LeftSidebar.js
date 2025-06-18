@@ -1,31 +1,45 @@
-
-
-
-
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import UserProfileModal from "./UserProfileModal";
-import { useNavigate } from 'react-router-dom';
-
 
 // import jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
 
-const LeftSidebar = ({ collapsed, toggleSidebar, onNavItemClick, activeSection }) => {
+const LeftSidebar = ({
+  collapsed,
+  toggleSidebar,
+  onNavItemClick,
+  activeSection,
+}) => {
   // const [activeItem, setActiveItem] = useState("dashboard");
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [sessions, setSessions] = useState([]);
 
-const handleNavItemClick = (item) => {
-  if (onNavItemClick) {
-    onNavItemClick(item);
-  }
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (!token) return;
 
-  // Add route navigation here
-  if (item === "intro") {
-    navigate("/intro");
-  }
-};
+    fetch(
+      `${
+        process.env.REACT_APP_API_URL || ""
+      }/api/chat/user-sessions/?token=${token}`
+    )
+      .then((res) => res.json())
+      .then((data) => setSessions(data))
+      .catch((err) => console.error("Failed to fetch sessions", err));
+  }, []);
 
+  const handleNavItemClick = (item) => {
+    if (onNavItemClick) {
+      onNavItemClick(item);
+    }
+
+    // Add route navigation here
+    if (item === "intro") {
+      navigate("/intro");
+    }
+  };
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -42,7 +56,7 @@ const handleNavItemClick = (item) => {
       setShowProfileModal(true);
     }
   };
-  
+
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
@@ -111,9 +125,35 @@ const handleNavItemClick = (item) => {
           </li>
         </ul>
 
-        <div className="text-xs font-semibold text-secondary-text uppercase p-2">
+        {/* <div className="text-xs font-semibold text-secondary-text uppercase p-2">
           {!collapsed && <span>Today</span>}
+        </div> */}
+        <div className="text-xs font-semibold text-secondary-text uppercase p-2">
+          {!collapsed && <span>Your Chats</span>}
         </div>
+
+        <ul className="p-2 list-item space-y-1">
+          {sessions.map((session) => (
+            <li
+              key={session.session_id}
+              className={`p-2 rounded-md cursor-pointer flex items-center text-sm hover:bg-[#2c3e50] ${
+                activeSection === session.session_id ? "bg-[#3b3b3b]" : ""
+              }`}
+              onClick={() => handleNavItemClick(session.session_id)}
+            >
+              <i className="bi bi-chat-dots-fill mr-2 text-base"></i>
+              {!collapsed && (
+                <span>
+                  Chat{" "}
+                  {new Date(session.created_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
 
         <ul className="p-2 list-item">
           <li
@@ -135,31 +175,6 @@ const handleNavItemClick = (item) => {
             {!collapsed && <span>Over 30 Days Ago</span>}
           </li>
         </ul>
-
-        {/* <div className="text-xs font-semibold text-secondary-text uppercase p-1">
-          {!collapsed && <span>Investment</span>}
-        </div> */}
-
-        {/* <ul className="p-2 list-item">
-          <li
-            className={`p-2 rounded-md cursor-pointer flex items-center ${
-              activeSection === "strategies" ? "" : ""
-            }`}
-            onClick={() => handleNavItemClick("strategies")}
-          >
-            <i className="bi bi-graph-up mr-3"></i>
-            {!collapsed && <span>Investment Strategies Overview</span>}
-          </li>
-          <li
-            className={`p-2 rounded-md cursor-pointer flex items-center ${
-              activeSection === "insights" ? "" : ""
-            }`}
-            onClick={() => handleNavItemClick("insights")}
-          >
-            <i className="bi bi-pie-chart-fill mr-3"></i>
-            {!collapsed && <span>Investment Insights and Analysis</span>}
-          </li>
-        </ul> */}
 
         <div className="p-4 mt-4">
           {!collapsed && (

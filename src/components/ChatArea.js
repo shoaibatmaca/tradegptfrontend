@@ -7,12 +7,12 @@ import TradingPromptsInline from "./TradingPromptsInline";
 const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
 
 // ADD: Update props to include prompts functionality
-const ChatArea = ({ 
-  toggleWatchlist, 
-  watchlistMessage, 
-  showPrompts, 
-  onClosePrompts, 
-  activeSection 
+const ChatArea = ({
+  toggleWatchlist,
+  watchlistMessage,
+  showPrompts,
+  onClosePrompts,
+  activeSection,
 }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -26,19 +26,19 @@ const ChatArea = ({
 
   // ... (all your existing functions remain the same: cleanAndFormat, scrollToBottom, etc.)
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
-  
+
   function cleanAndFormat(text) {
     return text
-      .replace(/^markdown[#>]*\s*/i, "") 
-      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2") 
-      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ") 
-      .replace(/\*\*(.*?)\*\*/g, "$1") 
-      .replace(/\*(.*?)\*/g, "$1") 
-      .replace(/`{1,3}(.*?)`{1,3}/g, "$1") 
-      .replace(/\|.*?\|/g, "") 
-      .replace(/-{3,}/g, "\n\n---\n\n") 
-      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ") 
-      .replace(/###\s*#\s*/g, "### ") 
+      .replace(/^markdown[#>]*\s*/i, "")
+      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
+      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
+      .replace(/\|.*?\|/g, "")
+      .replace(/-{3,}/g, "\n\n---\n\n")
+      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ")
+      .replace(/###\s*#\s*/g, "### ")
       .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
       .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
       .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
@@ -50,8 +50,8 @@ const ChatArea = ({
       .replace(/Note\s*:/gi, "\n\n**Note:** ")
       .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
       .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
-      .replace(/\n{2,}/g, "\n\n") 
-      .replace(/\s{2,}/g, " ") 
+      .replace(/\n{2,}/g, "\n\n")
+      .replace(/\s{2,}/g, " ")
       .trim();
   }
 
@@ -604,8 +604,11 @@ const ChatArea = ({
       {/* UPDATE: Conditional rendering for prompts vs default vs messages */}
       {showPrompts ? (
         // Show Trading Prompts Interface
-        <div className="flex-1 overflow-y-auto p-6" style={{backgroundColor:'#1e1e1e'}}>
-          <TradingPromptsInline 
+        <div
+          className="flex-1 overflow-y-auto p-6"
+          style={{ backgroundColor: "#1e1e1e" }}
+        >
+          <TradingPromptsInline
             isVisible={showPrompts}
             onUsePrompt={handleUsePrompt}
           />
@@ -703,7 +706,10 @@ const ChatArea = ({
         </div>
       )}
 
-      <div className="p-6 border-t border-gray-700" style={{backgroundColor: '#1e1e1e'}}>
+      <div
+        className="p-6 border-t border-gray-700"
+        style={{ backgroundColor: "#1e1e1e" }}
+      >
         <form onSubmit={handleSendMessage} className="relative">
           <input
             type="text"
