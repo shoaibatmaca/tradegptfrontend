@@ -66,7 +66,7 @@ const App = () => {
           } transition-all duration-300`}
         >
           <Routes>
-            <Route path="/intro" element={<IntroToTradeGPT />} />
+            {/* <Route path="/intro" element={<IntroToTradeGPT />} /> */}
             {/* <Route
               path="*"
               element={
