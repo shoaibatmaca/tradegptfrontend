@@ -27,32 +27,65 @@ const ChatArea = ({
   // ... (all your existing functions remain the same: cleanAndFormat, scrollToBottom, etc.)
   const FINNHUB_API_KEY = "d08gifhr01qh1ecc2v7gd08gifhr01qh1ecc2v80";
 
+  // function cleanAndFormat(text) {
+  //   return text
+  //     .replace(/^markdown[#>]*\s*/i, "")
+  //     .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
+  //     .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+  //     .replace(/\*\*(.*?)\*\*/g, "$1")
+  //     .replace(/\*(.*?)\*/g, "$1")
+  //     .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
+  //     .replace(/\|.*?\|/g, "")
+  //     .replace(/-{3,}/g, "\n\n---\n\n")
+  //     .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ")
+  //     .replace(/###\s*#\s*/g, "### ")
+  //     .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
+  //     .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
+  //     .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
+  //     .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
+  //     .replace(/AnalystInsights/gi, "Analyst Insights")
+  //     .replace(/UpcomingEvents/gi, "Upcoming Events")
+  //     .replace(/TechnicalIndicators/gi, "Technical Indicators")
+  //     .replace(/Competitors/gi, "Competitors")
+  //     .replace(/Note\s*:/gi, "\n\n**Note:** ")
+  //     .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
+  //     .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
+  //     .replace(/\n{2,}/g, "\n\n")
+  //     .replace(/\s{2,}/g, " ")
+  //     .trim();
+  // }
+
   function cleanAndFormat(text) {
-    return text
-      .replace(/^markdown[#>]*\s*/i, "")
-      .replace(/(?<!\n)(#+\s*)([A-Za-z])/g, "\n\n$1$2")
-      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*(.*?)\*/g, "$1")
-      .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
-      .replace(/\|.*?\|/g, "")
-      .replace(/-{3,}/g, "\n\n---\n\n")
-      .replace(/([A-Za-z])(:)(?=\S)/g, "$1: ")
-      .replace(/###\s*#\s*/g, "### ")
-      .replace(/KeyFinancialMetrics\s*\(TTM\)/gi, "### Key Financial Metrics")
-      .replace(/TradeSetupbyvalourGPT/gi, "Trade Setup by ValourGPT")
-      .replace(/Buy&SellReasons/gi, "Buy & Sell Reasons")
-      .replace(/UniqueValueProposition/gi, "Unique Value Proposition")
-      .replace(/AnalystInsights/gi, "Analyst Insights")
-      .replace(/UpcomingEvents/gi, "Upcoming Events")
-      .replace(/TechnicalIndicators/gi, "Technical Indicators")
-      .replace(/Competitors/gi, "Competitors")
-      .replace(/Note\s*:/gi, "\n\n**Note:** ")
-      .replace(/ValuationNote\s*:/gi, "\n\n**Valuation Note:** ")
-      .replace(/VisualAid\s*:/gi, "\n\n**Visual Aid:** ")
-      .replace(/\n{2,}/g, "\n\n")
-      .replace(/\s{2,}/g, " ")
-      .trim();
+    return (
+      text
+        .replace(/^markdown[#>]*\s*/i, "")
+        // Fix "Option 1:" → ### Option 1
+        .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
+
+        // Convert "Key: Value" to "- **Key:** Value"
+        .replace(/([A-Za-z ]+):\s*([^\n]+)/g, "- **$1:** $2")
+
+        // Normalize heading levels
+        .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+
+        // Add line breaks around ###
+        .replace(/(?<!\n)(### .+)/g, "\n\n$1")
+        .replace(/(### .+)(?!\n)/g, "$1\n\n")
+
+        // Remove markdown styling leftovers
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
+
+        // Remove markdown table pipes
+        .replace(/\|.*?\|/g, "")
+
+        // Add spacing between bullets
+        .replace(/\n{2,}/g, "\n\n")
+        .replace(/\s{2,}/g, " ")
+
+        .trim()
+    );
   }
 
   const promptCards = [
@@ -585,249 +618,6 @@ const ChatArea = ({
       setIsLoading(false);
     }
   };
-  // ✅ Full corrected ChatArea.js with full history support, prompt card click, and chat continuation
-
-  // import axios from "axios";
-  // import { useEffect, useRef, useState } from "react";
-  // import ReactMarkdown from "react-markdown";
-  // import PromptCard from "./PromptCard";
-  // import TradingPromptsInline from "./TradingPromptsInline";
-
-  // const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
-
-  // const ChatArea = ({
-  //   toggleWatchlist,
-  //   watchlistMessage,
-  //   showPrompts,
-  //   loadSessionId,
-  //   onClosePrompts,
-  //   activeSection,
-  // }) => {
-  //   const [messages, setMessages] = useState([]);
-  //   const [inputMessage, setInputMessage] = useState("");
-  //   const [isLoading, setIsLoading] = useState(false);
-  //   const [apiError, setApiError] = useState(null);
-  //   const [sessionId, setSessionId] = useState(null);
-  //   const messagesEndRef = useRef(null);
-  //   const [chatSessions, setChatSessions] = useState([]);
-  //   const [activeSessionId, setActiveSessionId] = useState(null);
-
-  //   const token = new URLSearchParams(window.location.search).get("token");
-
-  //   const handleInputChange = (e) => setInputMessage(e.target.value);
-
-  //   const promptCards = [
-  //     {
-  //       id: 1,
-  //       title: "Top 3 Call option contracts related to EV",
-  //       subtitle: "with the highest likelihood of profit",
-  //       icon: "ev",
-  //     },
-  //     {
-  //       id: 2,
-  //       title: "Top 3 Call option contracts",
-  //       subtitle: "in the AI hardware sector",
-  //       icon: "ai",
-  //     },
-  //     {
-  //       id: 3,
-  //       title: "Get me the top 3 option contracts for NVDA",
-  //       subtitle: "that can yield quick profits today",
-  //       icon: "nvda",
-  //     },
-  //     {
-  //       id: 4,
-  //       title: "Provide shorting entry and exit for QQQ",
-  //       subtitle: "based on today's technical analysis",
-  //       icon: "qqq",
-  //     },
-  //   ];
-
-  //   const handleUsePrompt = (promptText) => {
-  //     setInputMessage(promptText);
-  //     if (onClosePrompts) onClosePrompts();
-  //     setTimeout(() => {
-  //       const event = { preventDefault: () => {} };
-  //       handleSendMessage(event);
-  //     }, 100);
-  //   };
-
-  //   const loadSession = async (session_id) => {
-  //     try {
-  //       setSessionId(session_id);
-  //       setActiveSessionId(session_id);
-  //       const res = await axios.get(
-  //         `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
-  //       );
-  //       setMessages(res.data);
-  //     } catch (err) {
-  //       console.error("Failed to load session messages:", err);
-  //       setApiError("Failed to load chat session.");
-  //     }
-  //   };
-  //   const handlePromptCardClick = async (prompt) => {
-  //     handleUsePrompt(prompt);
-  //   };
-
-  //   const scrollToBottom = () => {
-  //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  //   };
-
-  //   useEffect(() => {
-  //     scrollToBottom();
-  //   }, [messages]);
-
-  //   useEffect(() => {
-  //     const fetchSessions = async () => {
-  //       try {
-  //         const res = await axios.get(
-  //           `${BACKEND_URL}/api/chat/user-sessions/?token=${token}`
-  //         );
-  //         setChatSessions(res.data);
-  //       } catch (err) {
-  //         console.error("Failed to load chat sessions:", err);
-  //       }
-  //     };
-  //     if (token) fetchSessions();
-  //   }, [token]);
-
-  //   useEffect(() => {
-  //     const startSession = async () => {
-  //       try {
-  //         const res = await axios.post(
-  //           `${BACKEND_URL}/api/chat/start/?token=${token}`
-  //         );
-  //         const newSessionId = res.data.session_id;
-  //         setSessionId(newSessionId);
-  //         setActiveSessionId(newSessionId);
-  //       } catch (err) {
-  //         console.error("Failed to start session:", err);
-  //       }
-  //     };
-
-  //     if (token && !sessionId) {
-  //       startSession();
-  //     }
-  //   }, [token, sessionId]);
-
-  //   useEffect(() => {
-  //     if (loadSessionId) {
-  //       loadSession(loadSessionId);
-  //     }
-  //   }, [loadSessionId]);
-
-  //   const handleSendMessage = async (e) => {
-  //     e.preventDefault();
-  //     if (!inputMessage.trim()) return;
-
-  //     const userMsg = {
-  //       id: messages.length + 1,
-  //       text: inputMessage,
-  //       sender: "user",
-  //       timestamp: new Date(),
-  //     };
-
-  //     setMessages((prev) => [...prev, userMsg]);
-  //     setInputMessage("");
-  //     setIsLoading(true);
-
-  //     try {
-  //       await axios.post(
-  //         `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
-  //         {
-  //           role: "user",
-  //           content: inputMessage,
-  //         }
-  //       );
-  //     } catch (err) {
-  //       console.error("Failed to save user message:", err);
-  //     }
-
-  //     const streamId = `${Date.now()}-directstream`;
-
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       {
-  //         id: streamId,
-  //         sender: "ai",
-  //         stage: "streaming",
-  //         partialText: "",
-  //         timestamp: new Date(),
-  //         queryType: "direct",
-  //       },
-  //     ]);
-
-  //     try {
-  //       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({ message: inputMessage }),
-  //       });
-
-  //       const reader = res.body.getReader();
-  //       const decoder = new TextDecoder("utf-8");
-  //       let fullText = "";
-  //       let buffer = "";
-
-  //       while (true) {
-  //         const { done, value } = await reader.read();
-  //         if (done) break;
-
-  //         const chunk = decoder.decode(value, { stream: true });
-  //         buffer += chunk;
-  //         const lines = buffer.split("\n");
-
-  //         for (let i = 0; i < lines.length; i++) {
-  //           const line = lines[i].trim();
-  //           if (line.startsWith("data:")) {
-  //             const text = line.replace("data:", "").trim();
-  //             const cleaned = text.replace(/\*\*/g, "");
-  //             fullText += cleaned;
-  //             setMessages((prev) =>
-  //               prev.map((m) =>
-  //                 m.id === streamId ? { ...m, partialText: fullText } : m
-  //               )
-  //             );
-  //           }
-  //         }
-
-  //         buffer = "";
-  //       }
-
-  //       setMessages((prev) =>
-  //         prev.map((m) =>
-  //           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-  //         )
-  //       );
-
-  //       try {
-  //         await axios.post(
-  //           `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
-  //           {
-  //             role: "ai",
-  //             content: fullText,
-  //           }
-  //         );
-  //       } catch (err) {
-  //         console.error("Failed to save AI message:", err);
-  //       }
-  //     } catch (err) {
-  //       console.error("Stream error:", err);
-  //       setMessages((prev) => [
-  //         ...prev,
-  //         {
-  //           id: `${streamId}-error`,
-  //           sender: "ai",
-  //           text: "Streaming failed.",
-  //           isError: true,
-  //           timestamp: new Date(),
-  //         },
-  //       ]);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
   return (
     <div className="flex flex-col h-screen bg-[#161921] pt-[0px]">
       <div className="flex items-center justify-between p-6 border-b border-gray-700">
@@ -983,368 +773,3 @@ const ChatArea = ({
 };
 
 export default ChatArea;
-
-// import axios from "axios";
-// import { useEffect, useRef, useState } from "react";
-// import ReactMarkdown from "react-markdown";
-// import PromptCard from "./PromptCard";
-// import TradingPromptsInline from "./TradingPromptsInline";
-
-// const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
-
-// const ChatArea = ({
-//   toggleWatchlist,
-//   watchlistMessage,
-//   showPrompts,
-//   // loadSessionId,
-//   onClosePrompts,
-//   activeSection,
-// }) => {
-//   const [messages, setMessages] = useState([]);
-//   const [inputMessage, setInputMessage] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [apiError, setApiError] = useState(null);
-//   const [sessionId, setSessionId] = useState(null);
-//   const messagesEndRef = useRef(null);
-//   const [chatSessions, setChatSessions] = useState([]);
-//   const [activeSessionId, setActiveSessionId] = useState(null);
-
-//   const token = new URLSearchParams(window.location.search).get("token");
-
-//   const promptCards = [
-//     {
-//       id: 1,
-//       title: "Top 3 Call option contracts related to EV",
-//       subtitle: "with the highest likelihood of profit",
-//       icon: "ev",
-//     },
-//     {
-//       id: 2,
-//       title: "Top 3 Call option contracts",
-//       subtitle: "in the AI hardware sector",
-//       icon: "ai",
-//     },
-//     {
-//       id: 3,
-//       title: "Get me the top 3 option contracts for NVDA",
-//       subtitle: "that can yield quick profits today",
-//       icon: "nvda",
-//     },
-//     {
-//       id: 4,
-//       title: "Provide shorting entry and exit for QQQ",
-//       subtitle: "based on today's technical analysis",
-//       icon: "qqq",
-//     },
-//   ];
-
-//   const handleUsePrompt = (promptText) => {
-//     setInputMessage(promptText);
-//     if (onClosePrompts) onClosePrompts();
-//     setTimeout(() => {
-//       const event = { preventDefault: () => {} };
-//       handleSendMessage(event);
-//     }, 100);
-//   };
-
-//   const scrollToBottom = () => {
-//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//   };
-
-//   const loadSession = async (session_id) => {
-//     try {
-//       setSessionId(session_id);
-//       setActiveSessionId(session_id);
-//       const res = await axios.get(
-//         `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
-//       );
-//       setMessages(res.data);
-//     } catch (err) {
-//       console.error("Failed to load session messages:", err);
-//       setApiError("Failed to load chat session.");
-//     }
-//   };
-
-//   useEffect(() => {
-//     scrollToBottom();
-//   }, [messages]);
-
-//   useEffect(() => {
-//     const fetchSessions = async () => {
-//       try {
-//         const res = await axios.get(
-//           `${BACKEND_URL}/api/chat/user-sessions/?token=${token}`
-//         );
-//         setChatSessions(res.data);
-
-//         // ✅ Automatically load the latest session if available
-//         if (res.data.length > 0 && !loadSessionId) {
-//           const latestSession = res.data[res.data.length - 1];
-//           loadSession(latestSession.session_id);
-//         }
-//       } catch (err) {
-//         console.error("Failed to load chat sessions:", err);
-//       }
-//     };
-
-//     if (token) fetchSessions();
-//   }, [token]);
-
-//   useEffect(() => {
-//     const startSession = async () => {
-//       try {
-//         const res = await axios.post(
-//           `${BACKEND_URL}/api/chat/start/?token=${token}`
-//         );
-//         const newSessionId = res.data.session_id;
-//         setSessionId(newSessionId);
-//         setActiveSessionId(newSessionId);
-//       } catch (err) {
-//         console.error("Failed to start session:", err);
-//       }
-//     };
-
-//     if (token && !sessionId && chatSessions.length === 0) {
-//       startSession();
-//     }
-//   }, [token, sessionId, chatSessions]);
-
-//   useEffect(() => {
-//     if (loadSessionId) {
-//       loadSession(loadSessionId);
-//     }
-//   }, [loadSessionId]);
-
-//   const handleInputChange = (e) => setInputMessage(e.target.value);
-
-//   const handleSendMessage = async (e) => {
-//     e.preventDefault();
-//     if (!inputMessage.trim()) return;
-
-//     const userMsg = {
-//       id: messages.length + 1,
-//       text: inputMessage,
-//       sender: "user",
-//       timestamp: new Date(),
-//     };
-
-//     setMessages((prev) => [...prev, userMsg]);
-//     setInputMessage("");
-//     setIsLoading(true);
-
-//     try {
-//       await axios.post(
-//         `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
-//         {
-//           role: "user",
-//           content: inputMessage,
-//         }
-//       );
-//     } catch (err) {
-//       console.error("Failed to save user message:", err);
-//     }
-
-//     const streamId = `${Date.now()}-directstream`;
-
-//     setMessages((prev) => [
-//       ...prev,
-//       {
-//         id: streamId,
-//         sender: "ai",
-//         stage: "streaming",
-//         partialText: "",
-//         timestamp: new Date(),
-//         queryType: "direct",
-//       },
-//     ]);
-
-//     try {
-//       const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ message: inputMessage }),
-//       });
-
-//       const reader = res.body.getReader();
-//       const decoder = new TextDecoder("utf-8");
-//       let fullText = "";
-//       let buffer = "";
-
-//       while (true) {
-//         const { done, value } = await reader.read();
-//         if (done) break;
-
-//         const chunk = decoder.decode(value, { stream: true });
-//         buffer += chunk;
-//         const lines = buffer.split("\n");
-
-//         for (let i = 0; i < lines.length; i++) {
-//           const line = lines[i].trim();
-//           if (line.startsWith("data:")) {
-//             const text = line.replace("data:", "").trim();
-//             const cleaned = text.replace(/\*\*/g, "");
-//             fullText += cleaned;
-
-//             setMessages((prev) =>
-//               prev.map((m) =>
-//                 m.id === streamId ? { ...m, partialText: fullText } : m
-//               )
-//             );
-//           }
-//         }
-
-//         buffer = "";
-//       }
-
-//       setMessages((prev) =>
-//         prev.map((m) =>
-//           m.id === streamId ? { ...m, stage: "final", text: fullText } : m
-//         )
-//       );
-
-//       try {
-//         await axios.post(
-//           `${BACKEND_URL}/api/chat/sessions/${sessionId}/messages/?token=${token}`,
-//           {
-//             role: "ai",
-//             content: fullText,
-//           }
-//         );
-//       } catch (err) {
-//         console.error("Failed to save AI message:", err);
-//       }
-//     } catch (err) {
-//       console.error("Stream error:", err);
-//       setMessages((prev) => [
-//         ...prev,
-//         {
-//           id: `${streamId}-error`,
-//           sender: "ai",
-//           text: "Streaming failed.",
-//           isError: true,
-//           timestamp: new Date(),
-//         },
-//       ]);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="flex flex-col h-screen bg-[#161921] pt-[0px]">
-//       {/* HEADER */}
-//       <div className="flex items-center justify-between p-6 border-b border-gray-700">
-//         <h1 className="text-2xl font-bold text-primary-text chat-help">
-//           How can I help you today?
-//         </h1>
-//       </div>
-
-//       {/* PROMPTS / CARDS / CHAT */}
-//       {showPrompts ? (
-//         <div className="flex-1 overflow-y-auto p-6 bg-[#1e1e1e]">
-//           <TradingPromptsInline
-//             isVisible={showPrompts}
-//             onUsePrompt={handleUsePrompt}
-//           />
-//         </div>
-//       ) : messages.length === 0 ? (
-//         <div className="flex-1 p-6 flex items-center justify-center">
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
-//             {promptCards.map((card) => (
-//               <PromptCard
-//                 key={card.id}
-//                 title={card.title}
-//                 subtitle={card.subtitle}
-//                 icon={card.icon}
-//                 onClick={() => handleUsePrompt(card.title)}
-//               />
-//             ))}
-//           </div>
-//         </div>
-//       ) : (
-//         <div className="flex-1 overflow-y-auto p-6 space-y-6 chat-bg">
-//           {messages.map((msg) => (
-//             <div
-//               key={msg.id}
-//               className={`flex ${
-//                 msg.sender === "user" ? "justify-end" : "justify-start"
-//               }`}
-//             >
-//               <div
-//                 className={`flex ${
-//                   msg.sender === "user" ? "flex-row-reverse" : ""
-//                 } w-full max-w-4xl`}
-//               >
-//                 <div
-//                   className={`rounded-full w-10 h-10 flex items-center justify-center ${
-//                     msg.sender === "user"
-//                       ? "bg-hover-bg text-primary-accent ml-3"
-//                       : "bg-hover-bg text-blue-400 mr-3"
-//                   }`}
-//                 >
-//                   <i
-//                     className={`bi ${
-//                       msg.sender === "user" ? "bi-person-circle" : "bi-robot"
-//                     } text-xl`}
-//                   ></i>
-//                 </div>
-//                 <div
-//                   className={`p-4 rounded-lg shadow whitespace-pre-wrap break-words w-full ${
-//                     msg.sender === "user"
-//                       ? "bg-primary-accent bg-primary text-white rounded-tr-none"
-//                       : msg.isError
-//                       ? "bg-red-900 bg-opacity-30 text-primary-text rounded-tl-none border border-red-400"
-//                       : "bg-card-bg text-primary-text rounded-tl-none"
-//                   }`}
-//                 >
-//                   {msg.stage === "streaming" ? (
-//                     <ReactMarkdown
-//                       className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
-//                       linkTarget="_blank"
-//                       children={(msg.partialText || "").replace(/\*\*/g, "")}
-//                     />
-//                   ) : (
-//                     <ReactMarkdown className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
-//                       {msg.text || ""}
-//                     </ReactMarkdown>
-//                   )}
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//           <div ref={messagesEndRef} />
-//         </div>
-//       )}
-
-//       {/* FOOTER */}
-//       <div className="p-6 border-t border-gray-700 bg-[#1e1e1e]">
-//         <form onSubmit={handleSendMessage} className="relative">
-//           <input
-//             type="text"
-//             className="w-full bg-input-bg border border-gray-600 rounded-full py-3 px-5 pr-12 text-primary-text placeholder-secondary-text focus:outline-none focus:border-primary-accent focus:ring-1 focus:ring-primary-accent"
-//             placeholder="Type your message..."
-//             value={inputMessage}
-//             onChange={handleInputChange}
-//             disabled={isLoading}
-//           />
-//           <button
-//             type="submit"
-//             disabled={!inputMessage.trim() || isLoading}
-//             className="absolute right-2 top-2 p-2 bg-primary-accent text-white rounded-full hover:bg-green-600 disabled:opacity-50"
-//           >
-//             {isLoading ? (
-//               <i className="bi bi-hourglass-split animate-spin"></i>
-//             ) : (
-//               <i className="bi bi-send-fill"></i>
-//             )}
-//           </button>
-//         </form>
-//         <p className="text-center text-xs text-secondary-text mt-2">
-//           TradeGPT is for informational purposes only.
-//         </p>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ChatArea;
