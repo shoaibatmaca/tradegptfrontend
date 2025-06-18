@@ -10,6 +10,7 @@ const LeftSidebar = ({
   toggleSidebar,
   onNavItemClick,
   activeSection,
+  setLoadSessionId,
 }) => {
   // const [activeItem, setActiveItem] = useState("dashboard");
 
@@ -124,7 +125,7 @@ const LeftSidebar = ({
           {!collapsed && <span>Your Chats</span>}
         </div>
 
-        <ul className="p-2 list-item space-y-1">
+        {/* <ul className="p-2 list-item space-y-1">
           {sessions.map((session) => (
             <li
               key={session.session_id}
@@ -132,6 +133,31 @@ const LeftSidebar = ({
                 activeSection === session.session_id ? "bg-[#3b3b3b]" : ""
               }`}
               onClick={() => handleNavItemClick(session.session_id)}
+            >
+              <i className="bi bi-chat-dots-fill mr-2 text-base"></i>
+              {!collapsed && (
+                <span>
+                  Chat{" "}
+                  {new Date(session.created_at).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul> */}
+        <ul className="p-2 list-item space-y-1">
+          {sessions.map((session) => (
+            <li
+              key={session.session_id}
+              className={`p-2 rounded-md cursor-pointer flex items-center text-sm hover:bg-[#2c3e50] ${
+                activeSection === session.session_id ? "bg-[#3b3b3b]" : ""
+              }`}
+              onClick={() => {
+                handleNavItemClick(session.session_id);
+                setLoadSessionId(session.session_id); // ✅ FIXED
+              }}
             >
               <i className="bi bi-chat-dots-fill mr-2 text-base"></i>
               {!collapsed && (
