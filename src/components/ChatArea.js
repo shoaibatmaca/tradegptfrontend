@@ -56,37 +56,39 @@ const ChatArea = ({
   // }
 
   function cleanAndFormat(text) {
-    return (
-      text
-        .replace(/^markdown[#>]*\s*/i, "")
-        // Fix "Option 1:" → ### Option 1
-        .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
+  return (
+    text
+      .replace(/^markdown[#>]*\s*/i, "")
+      // Split glued words like "AppleInc." → "Apple Inc."
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
 
-        // Convert "Key: Value" to "- **Key:** Value"
-        .replace(/([A-Za-z ]+):\s*([^\n]+)/g, "- **$1:** $2")
+      // Fix compressed Option X
+      .replace(/Option\s*(\d+)\s*:/g, "\n\n### Option $1\n")
 
-        // Normalize heading levels
-        .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
+      // Normalize headings
+      .replace(/#{3,6}\s*#?\s*/g, "\n\n### ")
 
-        // Add line breaks around ###
-        .replace(/(?<!\n)(### .+)/g, "\n\n$1")
-        .replace(/(### .+)(?!\n)/g, "$1\n\n")
+      // Add line breaks around headings
+      .replace(/(?<!\n)(### .+)/g, "\n\n$1")
+      .replace(/(### .+)(?!\n)/g, "$1\n\n")
 
-        // Remove markdown styling leftovers
-        .replace(/\*\*(.*?)\*\*/g, "$1")
-        .replace(/\*(.*?)\*/g, "$1")
-        .replace(/`{1,3}(.*?)`{1,3}/g, "$1")
+      // Convert key-value pairs into bullets
+      .replace(/([A-Za-z \/\(\)\.%]+):\s*([^\n]+)/g, "- **$1:** $2")
 
-        // Remove markdown table pipes
-        .replace(/\|.*?\|/g, "")
+      // Remove tables and markdown noise
+      .replace(/\|.*?\|/g, "")
+      .replace(/-{3,}/g, "\n\n---\n\n")
 
-        // Add spacing between bullets
-        .replace(/\n{2,}/g, "\n\n")
-        .replace(/\s{2,}/g, " ")
+      // Fix run-ons like "Strike:$100" → "Strike: $100"
+      .replace(/([a-zA-Z])(:)([^\s])/g, "$1: $3")
 
-        .trim()
-    );
-  }
+      // Normalize spacing
+      .replace(/\n{2,}/g, "\n\n")
+      .replace(/\s{2,}/g, " ")
+      .trim()
+  );
+}
+
 
   const promptCards = [
     {
