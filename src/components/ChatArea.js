@@ -599,6 +599,7 @@ const ChatArea = ({
   toggleWatchlist,
   watchlistMessage,
   showPrompts,
+  loadSessionId,
   onClosePrompts,
   activeSection,
 }) => {
@@ -616,10 +617,30 @@ const ChatArea = ({
   const handleInputChange = (e) => setInputMessage(e.target.value);
 
   const promptCards = [
-    { id: 1, title: "Top 3 Call option contracts related to EV", subtitle: "with the highest likelihood of profit", icon: "ev" },
-    { id: 2, title: "Top 3 Call option contracts", subtitle: "in the AI hardware sector", icon: "ai" },
-    { id: 3, title: "Get me the top 3 option contracts for NVDA", subtitle: "that can yield quick profits today", icon: "nvda" },
-    { id: 4, title: "Provide shorting entry and exit for QQQ", subtitle: "based on today's technical analysis", icon: "qqq" },
+    {
+      id: 1,
+      title: "Top 3 Call option contracts related to EV",
+      subtitle: "with the highest likelihood of profit",
+      icon: "ev",
+    },
+    {
+      id: 2,
+      title: "Top 3 Call option contracts",
+      subtitle: "in the AI hardware sector",
+      icon: "ai",
+    },
+    {
+      id: 3,
+      title: "Get me the top 3 option contracts for NVDA",
+      subtitle: "that can yield quick profits today",
+      icon: "nvda",
+    },
+    {
+      id: 4,
+      title: "Provide shorting entry and exit for QQQ",
+      subtitle: "based on today's technical analysis",
+      icon: "qqq",
+    },
   ];
 
   const handleUsePrompt = (promptText) => {
@@ -646,7 +667,9 @@ const ChatArea = ({
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`);
+        const res = await axios.get(
+          `${BACKEND_URL}/api/chat/user-sessions/?token=${token}`
+        );
         setChatSessions(res.data);
       } catch (err) {
         console.error("Failed to load chat sessions:", err);
@@ -658,7 +681,9 @@ const ChatArea = ({
   useEffect(() => {
     const startSession = async () => {
       try {
-        const res = await axios.post(`${BACKEND_URL}/api/chat/start/?token=${token}`);
+        const res = await axios.post(
+          `${BACKEND_URL}/api/chat/start/?token=${token}`
+        );
         const newSessionId = res.data.session_id;
         setSessionId(newSessionId);
         setActiveSessionId(newSessionId);
@@ -679,19 +704,17 @@ const ChatArea = ({
       const res = await axios.get(
         `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
       );
-      const formattedMessages = res.data.map((msg, index) => ({
-        id: index + 1,
-        sender: msg.role,
-        text: msg.content,
-        timestamp: msg.timestamp,
-        stage: "final",
-      }));
-      setMessages(formattedMessages);
+      setMessages(res.data);
     } catch (err) {
       console.error("Failed to load session messages:", err);
       setApiError("Failed to load chat session.");
     }
   };
+  useEffect(() => {
+    if (loadSessionId) {
+      loadSession(loadSessionId);
+    }
+  }, [loadSessionId]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -804,7 +827,6 @@ const ChatArea = ({
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="flex flex-col h-screen bg-[#161921] pt-[0px]">
