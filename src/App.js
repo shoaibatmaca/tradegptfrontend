@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import ChatArea from "./components/ChatArea";
-import ChatSessionSidebar from "./components/ChatSessionSidebar";
 import LeftSidebar from "./components/LeftSidebar";
 import IntroToTradeGPT from "./components/TradeGptIntro"; // make sure this file exists
 import Watchlist from "./components/Watchlist";
@@ -80,31 +79,25 @@ const App = () => {
                 />
               }
             /> */}
-            <Route
-              path="*"
-              element={
-                <div className="flex flex-1">
-                  <ChatSessionSidebar
-                    token={new URLSearchParams(window.location.search).get(
-                      "token"
-                    )}
-                    activeSessionId={activeSessionId}
-                    onSessionSelect={(sessionId) => {
-                      setActiveSessionId(sessionId);
-                      setLoadSessionId(sessionId);
-                    }}
-                  />
-                  <ChatArea
-                    toggleWatchlist={toggleWatchlist}
-                    watchlistMessage={watchlistMessage}
-                    showPrompts={showPrompts}
-                    onClosePrompts={handleClosePrompts}
-                    activeSection={activeSection}
-                    loadSessionId={loadSessionId}
-                  />
-                </div>
-              }
-            />
+            <Routes>
+              <Route path="/intro" element={<IntroToTradeGPT />} />
+              <Route
+                path="*"
+                element={
+                  <div className="flex flex-1">
+                    {/* Remove ChatSessionSidebar from here */}
+                    <ChatArea
+                      toggleWatchlist={toggleWatchlist}
+                      watchlistMessage={watchlistMessage}
+                      showPrompts={showPrompts}
+                      onClosePrompts={handleClosePrompts}
+                      activeSection={activeSection}
+                      loadSessionId={loadSessionId} // ✅ This is enough now
+                    />
+                  </div>
+                }
+              />
+            </Routes>
           </Routes>
         </div>
 
