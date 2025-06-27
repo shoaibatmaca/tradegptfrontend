@@ -779,7 +779,6 @@
 
 // export default ChatArea;
 
-
 // import axios from "axios";
 // import { useEffect, useRef, useState } from "react";
 // import ReactMarkdown from "react-markdown";
@@ -1561,16 +1560,14 @@
 
 // export default ChatArea;
 
-
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import PromptCard from "./PromptCard";
 import TradingPromptsInline from "./TradingPromptsInline";
 
-const BACKEND_URL = " http://127.0.0.1:8000";
-// const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
-
+// const BACKEND_URL = " http://127.0.0.1:8000";
+const BACKEND_URL = "https://backendoftradegpt-production.up.railway.app";
 
 // ADD: Update props to include prompts functionality
 const ChatArea = ({
@@ -1699,7 +1696,6 @@ const ChatArea = ({
     }, 100);
   };
 
-  // ... (all your existing useEffect and functions remain exactly the same)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -1707,7 +1703,7 @@ const ChatArea = ({
   useEffect(() => {
     if (token) {
       axios
-        .get(${BACKEND_URL}/api/chat/user-sessions/?token=${token})
+        .get(`${BACKEND_URL}/api/chat/user-sessions/?token=${token}`)
         .then((res) => {
           setChatSessions(res.data);
         })
@@ -1722,7 +1718,7 @@ const ChatArea = ({
       setSessionId(session_id);
       setActiveSessionId(session_id);
       const res = await axios.get(
-        ${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}
+        `${BACKEND_URL}/api/chat/sessions/${session_id}/messages/?token=${token}`
       );
       setMessages(res.data);
     } catch (err) {
@@ -1775,7 +1771,7 @@ const ChatArea = ({
 
     updateStep(3);
 
-    const streamId = ${baseId}-stream;
+    const streamId = `${baseId}-stream`;
 
     setMessages((prev) => [
       ...prev,
@@ -1790,7 +1786,7 @@ const ChatArea = ({
     ]);
 
     try {
-      const res = await fetch(${BACKEND_URL}/api/deepseek-chat/stream, {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg),
@@ -1853,7 +1849,7 @@ const ChatArea = ({
       setMessages((prev) => [
         ...prev,
         {
-          id: ${baseId}-error,
+          id: `${baseId}-error`,
           sender: "ai",
           text: "Streaming failed.",
           isError: true,
@@ -1883,7 +1879,7 @@ const ChatArea = ({
   const callOpenRouterAPI = async (messageText) => {
     setApiError(null);
 
-    const streamId = ${Date.now()}-directstream;
+    const streamId = `${Date.now()}-directstream`;
 
     setMessages((prev) => [
       ...prev,
@@ -1898,7 +1894,7 @@ const ChatArea = ({
     ]);
 
     try {
-      const res = await fetch(${BACKEND_URL}/api/deepseek-chat/direct/, {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: messageText }),
@@ -1948,7 +1944,7 @@ const ChatArea = ({
       setMessages((prev) => [
         ...prev,
         {
-          id: ${streamId}-error,
+          id: `${streamId}-error`,
           sender: "ai",
           text: "Streaming failed.",
           isError: true,
@@ -1965,7 +1961,7 @@ const ChatArea = ({
 
     try {
       const quoteRes = await axios.get(
-        https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=04RGF1U9PAJ49VYI
+        `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=04RGF1U9PAJ49VYI`
       );
 
       const timeSeries = quoteRes.data["Time Series (Daily)"];
@@ -1985,7 +1981,7 @@ const ChatArea = ({
         100
       ).toFixed(2)}%).`;
 
-      const aiRes = await axios.post(${BACKEND_URL}/api/deepseek-chat/, {
+      const aiRes = await axios.post(`${BACKEND_URL}/api/deepseek-chat/`, {
         model: "deepseek-chat",
         messages: [
           {
@@ -1994,7 +1990,7 @@ const ChatArea = ({
           },
           {
             role: "user",
-            content: Stock info for ${symbol}: ${summary}. Analyze this from a trading perspective.,
+            content: `Stock info for ${symbol}: ${summary}. Analyze this from a trading perspective.`,
           },
         ],
         stream: false,
@@ -2003,7 +1999,7 @@ const ChatArea = ({
       return aiRes.data.message || aiRes.data.content || "No AI response.";
     } catch (error) {
       console.error("DeepSeek V3 error:", error);
-      return Error retrieving info for ${symbol}.;
+      return Error`retrieving info for ${symbol}.`;
     }
   };
 
@@ -2023,7 +2019,7 @@ const ChatArea = ({
     setInputMessage("");
     setIsLoading(true);
 
-    const streamId = ${Date.now()}-directstream;
+    const streamId = `${Date.now()}-directstream`;
 
     setMessages((prev) => [
       ...prev,
@@ -2038,14 +2034,17 @@ const ChatArea = ({
     ]);
 
     try {
-      console.log("Sending request to:", ${BACKEND_URL}/api/deepseek-chat/direct/);
+      console.log(
+        "Sending request to:",
+        `${BACKEND_URL}/api/deepseek-chat/direct/`
+      );
       console.log("Request body:", { message: currentMessage });
 
-      const res = await fetch(${BACKEND_URL}/api/deepseek-chat/direct/, {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({ message: currentMessage }),
       });
@@ -2053,7 +2052,7 @@ const ChatArea = ({
       console.log("Response status:", res.status);
 
       if (!res.ok) {
-        throw new Error(HTTP error! status: ${res.status});
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
 
       // Handle JSON response instead of streaming
@@ -2069,20 +2068,22 @@ const ChatArea = ({
         let fullText = "";
         for (let i = 0; i < data.sentences.length; i++) {
           fullText += data.sentences[i] + " ";
-          
+
           setMessages((prev) =>
             prev.map((m) =>
               m.id === streamId ? { ...m, partialText: fullText.trim() } : m
             )
           );
-          
+
           // Add delay for streaming effect
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        
+
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === streamId ? { ...m, stage: "final", text: fullText.trim() } : m
+            m.id === streamId
+              ? { ...m, stage: "final", text: fullText.trim() }
+              : m
           )
         );
       } else {
@@ -2094,15 +2095,14 @@ const ChatArea = ({
           )
         );
       }
-
     } catch (err) {
       console.error("Request error:", err);
       setMessages((prev) => [
         ...prev,
         {
-          id: ${streamId}-error,
+          id: `${streamId}-error`,
           sender: "ai",
-          text: Error: ${err.message}. Check console for details.,
+          text: `Error: ${err.message}. Check console for details.`,
           isError: true,
           timestamp: new Date(),
         },
@@ -2125,7 +2125,7 @@ const ChatArea = ({
     setMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
 
-    const streamId = ${Date.now()}-promptstream;
+    const streamId = `${Date.now()}-promptstream`;
 
     setMessages((prev) => [
       ...prev,
@@ -2140,7 +2140,7 @@ const ChatArea = ({
     ]);
 
     try {
-      const res = await fetch(${BACKEND_URL}/api/deepseek-chat/direct/, {
+      const res = await fetch(`${BACKEND_URL}/api/deepseek-chat/direct/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: prompt }),
@@ -2190,7 +2190,7 @@ const ChatArea = ({
       setMessages((prev) => [
         ...prev,
         {
-          id: ${streamId}-error,
+          id: `${streamId}-error`,
           sender: "ai",
           text: "Streaming failed.",
           isError: true,
@@ -2204,29 +2204,119 @@ const ChatArea = ({
 
   // Define markdown components for styling
   const markdownComponents = {
-    p: ({children}) => <p className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</p>,
-    h1: ({children}) => <h1 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</h1>,
-    h2: ({children}) => <h2 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</h2>,
-    h3: ({children}) => <h3 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</h3>,
-    ul: ({children}) => <ul className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</ul>,
-    ol: ({children}) => <ol className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</ol>,
-    li: ({children}) => <li className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</li>,
-    code: ({children}) => <code className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</code>,
-    pre: ({children}) => <pre className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</pre>,
-    a: ({children, href}) => <a href={href} target="_blank" rel="noopener noreferrer" className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">{children}</a>,
+    p: ({ children }) => (
+      <p className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </p>
+    ),
+    h1: ({ children }) => (
+      <h1 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </h3>
+    ),
+    ul: ({ children }) => (
+      <ul className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </ol>
+    ),
+    li: ({ children }) => (
+      <li className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </li>
+    ),
+    code: ({ children }) => (
+      <code className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </code>
+    ),
+    pre: ({ children }) => (
+      <pre className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed">
+        {children}
+      </pre>
+    ),
+    a: ({ children, href }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="prose prose-invert max-w-none whitespace-pre-wrap break-words leading-relaxed"
+      >
+        {children}
+      </a>
+    ),
   };
 
   const finalMarkdownComponents = {
-    p: ({children}) => <p className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</p>,
-    h1: ({children}) => <h1 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</h1>,
-    h2: ({children}) => <h2 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</h2>,
-    h3: ({children}) => <h3 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</h3>,
-    ul: ({children}) => <ul className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</ul>,
-    ol: ({children}) => <ol className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</ol>,
-    li: ({children}) => <li className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</li>,
-    code: ({children}) => <code className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</code>,
-    pre: ({children}) => <pre className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</pre>,
-    a: ({children, href}) => <a href={href} target="_blank" rel="noopener noreferrer" className="prose prose-invert max-w-none whitespace-pre-wrap break-words">{children}</a>,
+    p: ({ children }) => (
+      <p className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </p>
+    ),
+    h1: ({ children }) => (
+      <h1 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </h3>
+    ),
+    ul: ({ children }) => (
+      <ul className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </ol>
+    ),
+    li: ({ children }) => (
+      <li className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </li>
+    ),
+    code: ({ children }) => (
+      <code className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </code>
+    ),
+    pre: ({ children }) => (
+      <pre className="prose prose-invert max-w-none whitespace-pre-wrap break-words">
+        {children}
+      </pre>
+    ),
+    a: ({ children, href }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="prose prose-invert max-w-none whitespace-pre-wrap break-words"
+      >
+        {children}
+      </a>
+    ),
   };
 
   return (
@@ -2331,9 +2421,7 @@ const ChatArea = ({
                       children={(msg.partialText || "").replace(/\\/g, "")}
                     />
                   ) : msg.stage === "final" ? (
-                    <ReactMarkdown 
-                      components={finalMarkdownComponents}
-                    >
+                    <ReactMarkdown components={finalMarkdownComponents}>
                       {msg.text || ""}
                     </ReactMarkdown>
                   ) : (
